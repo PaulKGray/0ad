@@ -3,8 +3,6 @@
   <Formation>
     <Icon>formations/line_closed.png</Icon>
     <FormationName>Line Closed</FormationName>
-    <SpeedMultiplier>1.25</SpeedMultiplier>
-    <Sloppyness>15</Sloppyness>
     <MinColumns>3</MinColumns>
     <WidthDepthRatio>4</WidthDepthRatio>
   </Formation>
