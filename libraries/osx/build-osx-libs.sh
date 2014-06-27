@@ -28,7 +28,7 @@ XML2_VERSION="libxml2-2.9.1"
 SDL_VERSION="SDL-1.2.15"
 BOOST_VERSION="boost_1_52_0"
 # * wxWidgets 2.9+ is necessary for 64-bit OS X build w/ OpenGL support
-WXWIDGETS_VERSION="wxWidgets-3.0.0"
+WXWIDGETS_VERSION="wxWidgets-3.0.1"
 JPEG_VERSION="jpegsrc.v8d"
 JPEG_DIR="jpeg-8d" # Must match directory name inside source tarball
 # * libpng was included as part of X11 but that's removed from Mountain Lion
@@ -65,7 +65,7 @@ ARCH=${ARCH:="x86_64"}
 # Define compiler as "gcc" (in case anything expects e.g. gcc-4.2)
 # On newer OS X versions, this will be a symbolic link to LLVM GCC
 # TODO: don't rely on that
-export CC=${CC:="gcc"} CXX=${CXX:="g++"}
+export CC=${CC:="clang"} CXX=${CXX:="clang++"}
 
 # The various libs offer inconsistent configure options, some allow
 # setting sysroot and OS X-specific options, others don't. Adding to
@@ -85,6 +85,11 @@ if [[ $MIN_OSX_VERSION && ${MIN_OSX_VERSION-_} ]]; then
   # clang and llvm-gcc look at mmacosx-version-min to determine link target
   # and CRT version, and use it to set the macosx_version_min linker flag
   LDFLAGS="$LDFLAGS -mmacosx-version-min=$MIN_OSX_VERSION"
+else
+  C_FLAGS="$C_FLAGS -mmacosx-version-min=10.9"
+  # clang and llvm-gcc look at mmacosx-version-min to determine link target
+  # and CRT version, and use it to set the macosx_version_min linker flag
+  LDFLAGS="$LDFLAGS -mmacosx-version-min=10.9"
 fi
 C_FLAGS="$C_FLAGS -arch $ARCH -fvisibility=hidden"
 LDFLAGS="$LDFLAGS -arch $ARCH"
@@ -208,8 +213,8 @@ LIB_ARCHIVE="$LIB_VERSION.tar.gz"
 LIB_DIRECTORY="$LIB_VERSION"
 LIB_URL="http://ftp.gnu.org/pub/gnu/libiconv/"
 
-mkdir -p libiconv
-pushd libiconv > /dev/null
+mkdir -p iconv
+pushd iconv > /dev/null
 
 ICONV_DIR="$(pwd)"
 
@@ -317,7 +322,7 @@ then
   pushd $LIB_DIRECTORY
 
   # Can't use macosx-version, see above comment.
-  (./bootstrap.sh --with-libraries=filesystem,system,signals --prefix=$INSTALL_DIR && ./b2 cflags="$CFLAGS" cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" ${JOBS} -d2 --layout=tagged --debug-configuration link=static threading=multi variant=release,debug install) || die "Boost build failed"
+(./bootstrap.sh --with-libraries=filesystem,system,signals --prefix=$INSTALL_DIR && ./b2 cflags="$CFLAGS" toolset=clang cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" ${JOBS} -d2 --layout=tagged --debug-configuration link=static threading=multi variant=release,debug install) || die "Boost build failed"
 
   popd
   touch .already-built
@@ -353,7 +358,7 @@ then
   pushd build-release
 
   # disable XML and richtext support, to avoid dependency on expat
-  CONF_OPTS="--prefix=$INSTALL_DIR --disable-shared --enable-unicode --with-cocoa --with-opengl --with-libiconv-prefix=${ICONV_DIR} --disable-richtext --without-expat --without-sdl"
+  CONF_OPTS="--prefix=$INSTALL_DIR --disable-shared --enable-unicode --with-cocoa --with-opengl --with-libiconv-prefix=${ICONV_DIR} --disable-richtext --with-expat=builtin --without-sdl"
   # wxWidgets configure now defaults to targeting 10.5, if not specified,
   # but that conflicts with our flags
   if [[ $MIN_OSX_VERSION && ${MIN_OSX_VERSION-_} ]]; then
@@ -546,7 +551,7 @@ then
   tar -xf $LIB_ARCHIVE
   pushd $LIB_DIRECTORY/nspr
 
-  (CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" LDFLAGS="$LDFLAGS" ./configure --prefix="$NSPR_DIR" && make ${JOBS} && make install) || die "NSPR build failed"
+  (CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS" ./configure --prefix="$NSPR_DIR" && make ${JOBS} && make install) || die "NSPR build failed"
   popd
   # TODO: how can we not build the dylibs?
   rm -f lib/*.dylib
@@ -581,7 +586,7 @@ then
   mkdir -p source/build
   pushd source/build
 
-  (CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" LDFLAGS="$LDFLAGS" ../runConfigureICU MacOSX --prefix=$INSTALL_DIR --disable-shared --enable-static --disable-samples --enable-extras --enable-icuio --enable-layout --enable-tools && make ${JOBS} && make install) || die "ICU build failed"
+(CXX="clang" CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS -stdlib=libstdc++" LDFLAGS="$LDFLAGS -lstdc++" ../runConfigureICU MacOSX --prefix=$INSTALL_DIR --disable-shared --enable-static --disable-samples --enable-extras --enable-icuio --enable-layout --enable-tools && make ${JOBS} && make install) || die "ICU build failed"
   popd
   popd
   touch .already-built

@@ -41,8 +41,8 @@ m.ResearchManager.prototype.checkPhase = function(gameState, queues)
 
 		queues.majorTech.addItem(plan);
 	}
-	else if (gameState.canResearch(cityPhase,true) && gameState.getTimeElapsed() > (this.Config.Economy.cityPhase*1000)
-			&& gameState.getOwnEntitiesByRole("worker", true).length > 85
+	else if (gameState.canResearch(cityPhase,true) && gameState.ai.elapsedTime > this.Config.Economy.cityPhase
+			&& gameState.getOwnEntitiesByRole("worker", true).length > 80
 			&& gameState.findResearchers(cityPhase, true).length != 0
 			&& queues.civilCentre.length() === 0)
 	{
@@ -65,8 +65,6 @@ m.ResearchManager.prototype.researchPopulationBonus = function(gameState, queues
 		// TODO may-be loop on all modifs and check if the effect if positive ?
 		if (tech[1]._template.modifications[0].value !== "Cost/PopulationBonus")
 			continue;
-		if (this.Config.debug > 0)
-			warn(" ... ok we've found the " + tech[0] + " tech");
 		queues.minorTech.addItem(new m.ResearchPlan(gameState, tech[0]));
 		break;
 	}
@@ -87,8 +85,6 @@ m.ResearchManager.prototype.researchTradeBonus = function(gameState, queues)
 		// TODO may-be loop on all modifs and check if the effect if positive ?
 		if (tech[1]._template.modifications[0].value !== "UnitMotion/WalkSpeed")
 			continue;
-		if (this.Config.debug > 0)
-			warn(" ... ok we've found the " + tech[0] + " tech");
 		queues.minorTech.addItem(new m.ResearchPlan(gameState, tech[0]));
 		break;
 	}
@@ -105,33 +101,36 @@ m.ResearchManager.prototype.researchWantedTechs = function(gameState, queues)
 		if (!tech[1]._template.modifications)
 			continue;
 		var template = tech[1]._template;
-		if (template.modifications[0].value.indexOf("ResourceGatherer/Capacities") !== -1)
+		for (var i in template.modifications)
 		{
-			techName = tech[0];
-			break;
-		}
-		else if (template.modifications[0].value === "ResourceGatherer/Rates/food.grain")
-		{
-			techName = tech[0];
-			break;
-		}
-		else if (template.modifications[0].value === "Health/RegenRate")
-		{
-			techName = tech[0];
-			break;
-		}
-		else if (template.modifications[0].value === "BuildingAI/DefaultArrowCount" && template.affects.indexOf("Tower"))
-		{
-			techName = tech[0];
-			break;
+			if (template.modifications[i].value.indexOf("ResourceGatherer/Capacities") !== -1)
+			{
+				queues.minorTech.addItem(new m.ResearchPlan(gameState, tech[0]));
+				return;
+			}
+			else if (template.modifications[i].value === "ResourceGatherer/Rates/food.grain")
+			{
+				queues.minorTech.addItem(new m.ResearchPlan(gameState, tech[0]));
+				return;
+			}
+			else if (template.modifications[i].value === "Health/RegenRate")
+			{
+				queues.minorTech.addItem(new m.ResearchPlan(gameState, tech[0]));
+				return;
+			}
+			else if (template.modifications[i].value === "Attack/Ranged/MaxRange")
+			{
+				queues.minorTech.addItem(new m.ResearchPlan(gameState, tech[0]));
+				return;
+			}
+			else if (template.modifications[i].value === "BuildingAI/DefaultArrowCount"
+				&& template.affects.indexOf("Tower"))
+			{
+				queues.minorTech.addItem(new m.ResearchPlan(gameState, tech[0]));
+				return;
+			}
 		}
 	}
-
-	if (!techName)
-		return;
-	if (this.Config.debug > 0)
-		warn(" ... ok we've found the " + techName + " tech");
-	queues.minorTech.addItem(new m.ResearchPlan(gameState, techName));
 };
 
 m.ResearchManager.prototype.update = function(gameState, queues)
