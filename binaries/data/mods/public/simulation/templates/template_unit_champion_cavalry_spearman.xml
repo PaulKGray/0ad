@@ -35,7 +35,5 @@
   <Identity>
     <VisibleClasses datatype="tokens">Melee Spear</VisibleClasses>
     <GenericName>Champion Cavalry Spearman</GenericName>
-	<Tooltip>Counters: 2x vs. Swordsmen and Siege Weapons, 1.5x vs. Skirmishers.
-Countered by: Spearmen, Archers, and Elephants.</Tooltip>
   </Identity>
 </Entity>

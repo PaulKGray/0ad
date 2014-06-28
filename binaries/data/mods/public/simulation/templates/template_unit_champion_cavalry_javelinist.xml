@@ -27,8 +27,6 @@
   <Identity>
     <VisibleClasses datatype="tokens">Ranged Javelin</VisibleClasses>
     <GenericName>Champion Cavalry Skirmisher</GenericName>
-    <Tooltip>Counters: 2x vs. Archers, 1.5x vs. Cavalry Swordsmen.
-Countered by: Spearmen and Elephants.</Tooltip>
     <Formations datatype="tokens">
       formations/skirmish
     </Formations>

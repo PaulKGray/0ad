@@ -35,7 +35,5 @@
   <Identity>
     <VisibleClasses datatype="tokens">Melee Sword</VisibleClasses>
     <GenericName>Champion Cavalry Swordsman</GenericName>
-	<Tooltip>Counters: 2x vs. Archers, All Support Units, and Siege Weapons.
-Countered by: Spearmen, Cavalry Skirmishers, and Elephants.</Tooltip>
   </Identity>
 </Entity>

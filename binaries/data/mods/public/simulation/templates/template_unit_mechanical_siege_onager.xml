@@ -42,9 +42,7 @@
   </Health>
   <Identity>
     <GenericName>Siege Catapult</GenericName>
-    <Tooltip>Classes: Siege Ranged Catapult.
-Counters: Structures and Massed Infantry. Causes splash damage.
-Countered by: Melee Cavalry.</Tooltip>
+    <Tooltip>Causes splash damage.</Tooltip>
     <Classes datatype="tokens">Ranged Catapult</Classes>
   </Identity>
   <Loot>

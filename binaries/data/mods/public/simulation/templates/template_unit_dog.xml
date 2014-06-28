@@ -51,7 +51,7 @@
     <VisibleClasses datatype="tokens">Dog</VisibleClasses>
     <GenericName>War Dog</GenericName>
     <Rank>Basic</Rank>
-    <Tooltip>Counters: 3x vs. Cavalry, 2x vs. Support, 1.5x vs. Animals. Cannot attack structures.</Tooltip>
+    <Tooltip>Cannot attack structures.</Tooltip>
   </Identity>
   <Loot>
     <xp>130</xp>
