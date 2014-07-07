@@ -50,7 +50,10 @@
       gather_mining_slaves
       gather_mining_wedgemallet
       gather_mining_shaftmining
-      gather_mining_silvermining      
+      gather_mining_silvermining
+      gather_capacity_basket
+      gather_capacity_wheelbarrow
+      gather_capacity_carts
     </Technologies>
   </ProductionQueue>
   <RallyPoint disable=""/>
