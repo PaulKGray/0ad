@@ -15,11 +15,6 @@
       <MinRange>0.0</MinRange>
     </Charge>
   </Attack>
-  <Armour>
-    <Hack>3</Hack>
-    <Pierce>1</Pierce>
-    <Crush>2</Crush>
-  </Armour>
   <Cost>
     <Resources>
       <wood>35</wood>

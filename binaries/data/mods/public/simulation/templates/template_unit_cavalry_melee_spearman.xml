@@ -3,11 +3,12 @@
   <Attack>
     <Melee>
       <Hack>5.0</Hack>
-      <Pierce>10.0</Pierce>
+      <Pierce>40.0</Pierce>
+      <RepeatTime>2250</RepeatTime>
     </Melee>
     <Charge>
       <Hack>10.0</Hack>
-      <Pierce>20.0</Pierce>
+      <Pierce>80.0</Pierce>
     </Charge>
   </Attack>
   <Cost>
