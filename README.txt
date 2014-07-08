@@ -63,6 +63,7 @@ Units
 - Singers deal both crush and pierce damage.
 - All hard bonuses have been taken out.
 - Swordsmen cost less metal, but cost a little wood.
+- Cavalry Spearmen act more like knights and lancers - high attack, but slow repeat time.
 
 Structures
 - All structures are now weaker against crush and hack damage.
