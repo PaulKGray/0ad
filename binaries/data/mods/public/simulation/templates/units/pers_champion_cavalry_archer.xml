@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Entity parent="template_unit_champion_cavalry_archer">
-  <Armour>
-    <Hack>10</Hack>
-    <Pierce>16</Pierce>
-    <Crush>10</Crush>
-  </Armour>
-  <Cost>
-    <Resources>
-      <wood>0</wood>
-	  <metal>100</metal>
-    </Resources>
-  </Cost>
   <Identity>
     <Civ>pers</Civ>
     <GenericName>Bactrian Heavy Cavalry Archer</GenericName>

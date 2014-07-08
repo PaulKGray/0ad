@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Entity parent="template_unit_champion_infantry">
   <Armour>
-    <Hack>15</Hack>
-    <Pierce>10</Pierce>
-    <Crush>10</Crush>
+    <Hack>13</Hack>
+    <Pierce>15</Pierce>
+    <Crush>11</Crush>
   </Armour>
   <Attack>
     <Melee>
-      <Hack>10.0</Hack>
-      <Pierce>0.0</Pierce>
+      <Hack>6.0</Hack>
+      <Pierce>12.0</Pierce>
       <Crush>0.0</Crush>
       <MaxRange>8.0</MaxRange>
-      <RepeatTime>1000</RepeatTime>
+      <RepeatTime>750</RepeatTime>
     </Melee>
     <Charge>
-      <Hack>20.0</Hack>
-      <Pierce>0.0</Pierce>
+      <Hack>6.0</Hack>
+      <Pierce>24.0</Pierce>
       <Crush>0.0</Crush>
       <MaxRange>8.0</MaxRange>
       <MinRange>0.0</MinRange>
@@ -24,10 +24,7 @@
   </Attack>
   <Cost>
     <Resources>
-      <food>50</food>
-      <wood>0</wood>
-      <stone>0</stone>
-      <metal>75</metal>
+      <wood>100</wood>
     </Resources>
   </Cost>
   <Identity>
