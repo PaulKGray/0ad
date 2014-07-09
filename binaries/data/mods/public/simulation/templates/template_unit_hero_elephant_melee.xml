@@ -60,7 +60,7 @@
     </SoundGroups>
   </Sound>
   <UnitMotion>
-    <WalkSpeed>7.0</WalkSpeed>
+    <WalkSpeed>10.0</WalkSpeed>
     <Run>
       <Speed>14.0</Speed>
       <Range>1000.0</Range>

@@ -9,7 +9,7 @@
     <Icon>units/celt_champion_infantry_brit.png</Icon>
   </Identity>
   <UnitMotion>
-    <WalkSpeed>7.0</WalkSpeed>
+    <WalkSpeed>10.0</WalkSpeed>
     <Run>
       <Speed>20.0</Speed>
     </Run>

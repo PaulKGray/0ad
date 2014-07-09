@@ -19,7 +19,7 @@
     <Entity>units/brit_infantry_spearman_a</Entity>
   </Promotion>
   <UnitMotion>
-    <WalkSpeed>8.2</WalkSpeed>
+    <WalkSpeed>11.0</WalkSpeed>
     <Run>
       <Speed>24.6</Speed>
     </Run>

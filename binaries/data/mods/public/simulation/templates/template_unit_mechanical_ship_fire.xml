@@ -46,7 +46,7 @@
   </StatusBars>
   <ResourceGatherer disable=""/>
   <UnitMotion>
-    <WalkSpeed>16.0</WalkSpeed>
+    <WalkSpeed>19.0</WalkSpeed>
     <Run>
       <Speed>22.0</Speed>
     </Run>

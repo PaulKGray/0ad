@@ -18,7 +18,7 @@
   </Identity>
   <Promotion disable=""/>
   <UnitMotion>
-    <WalkSpeed>12</WalkSpeed>
+    <WalkSpeed>15.0</WalkSpeed>
     <Run>
       <Speed>24</Speed>
     </Run>

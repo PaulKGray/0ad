@@ -43,7 +43,7 @@
     </Capacities>
   </ResourceGatherer>
   <UnitMotion>
-    <WalkSpeed>11.0</WalkSpeed>
+    <WalkSpeed>14.0</WalkSpeed>
     <Run>
       <Speed>33.0</Speed>
     </Run>

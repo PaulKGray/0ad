@@ -61,7 +61,7 @@
     </Overlay>
   </Selectable>
   <UnitMotion>
-    <WalkSpeed>6.5</WalkSpeed>
+    <WalkSpeed>9.5</WalkSpeed>
     <Run>
       <Speed>12.0</Speed>
     </Run>

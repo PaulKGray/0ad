@@ -17,7 +17,7 @@
     <Icon>units/hele_champion_infantry_polis.png</Icon>
   </Identity>
   <UnitMotion>
-    <WalkSpeed>6.5</WalkSpeed>
+    <WalkSpeed>9.5</WalkSpeed>
     <Run>
       <Speed>18.0</Speed>
     </Run>

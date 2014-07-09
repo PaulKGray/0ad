@@ -25,7 +25,7 @@ Countered by: Skirmishers and Elephants.
     </SoundGroups>
   </Sound>
   <UnitMotion>
-    <WalkSpeed>10.0</WalkSpeed>
+    <WalkSpeed>13.0</WalkSpeed>
     <Run>
       <Speed>18.0</Speed>
     </Run>

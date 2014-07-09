@@ -10,7 +10,7 @@
     <Icon>units/hele_champion_ranged_polis.png</Icon>
   </Identity>
   <UnitMotion>
-    <WalkSpeed>11.0</WalkSpeed>
+    <WalkSpeed>14.0</WalkSpeed>
     <Run>
       <Speed>20.0</Speed>
     </Run>

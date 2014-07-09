@@ -32,7 +32,7 @@
   </UnitAI>
   <Guard disable=""/>
   <UnitMotion>
-    <WalkSpeed>5.0</WalkSpeed>
+    <WalkSpeed>8.0</WalkSpeed>
     <Run>
       <Speed>15.0</Speed>
     </Run>

@@ -24,7 +24,7 @@
     <BaseSpeed>0.5</BaseSpeed>
   </ResourceGatherer>
   <UnitMotion>
-    <WalkSpeed>11.0</WalkSpeed>
+    <WalkSpeed>14.0</WalkSpeed>
     <Run>
       <Speed>22.0</Speed>
     </Run>

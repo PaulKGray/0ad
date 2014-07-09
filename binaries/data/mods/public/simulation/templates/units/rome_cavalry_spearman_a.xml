@@ -25,7 +25,7 @@
     <Entity>units/rome_cavalry_spearman_e</Entity>
   </Promotion>
   <UnitMotion>
-    <WalkSpeed>12.5</WalkSpeed>
+    <WalkSpeed>15.5</WalkSpeed>
     <Run>
       <Speed>25.0</Speed>
     </Run>

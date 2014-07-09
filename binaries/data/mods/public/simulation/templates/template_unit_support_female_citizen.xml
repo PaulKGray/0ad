@@ -99,7 +99,7 @@
     <AlertReactiveLevel>1</AlertReactiveLevel>
   </UnitAI>
   <UnitMotion>
-    <WalkSpeed>8.0</WalkSpeed>
+    <WalkSpeed>11.0</WalkSpeed>
     <Run>
       <Speed>16.0</Speed>
       <Range>200.0</Range>
