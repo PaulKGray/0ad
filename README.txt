@@ -64,6 +64,7 @@ Units
 - All hard bonuses have been taken out.
 - Swordsmen cost less metal, but cost a little wood.
 - Cavalry Spearmen act more like knights and lancers - high attack, but slow repeat time.
+- Units move faster.
 
 Structures
 - All structures are now weaker against crush and hack damage.
