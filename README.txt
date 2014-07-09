@@ -60,7 +60,7 @@ Units
 - Female Citizens train much faster.
 - Elite Iberian Skirmishers have been nerfed.
 - All units attack faster.
-- Singers deal both crush and pierce damage.
+- Slingers deal both crush and pierce damage.
 - All hard bonuses have been taken out.
 - Swordsmen cost less metal, but cost a little wood.
 - Cavalry Spearmen act more like knights and lancers - high attack, but slow repeat time.
