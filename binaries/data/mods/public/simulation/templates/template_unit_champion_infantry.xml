@@ -24,7 +24,7 @@
       <food>100</food>
       <wood>0</wood>
       <stone>0</stone>
-      <metal>0</metal>
+      <metal>50</metal>
     </Resources>
   </Cost>
   <Health>
