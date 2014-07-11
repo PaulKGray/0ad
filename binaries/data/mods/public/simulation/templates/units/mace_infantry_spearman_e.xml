@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Entity parent="units/mace_infantry_spearman_a">
   <Armour>
-    <Hack>14</Hack>
-    <Pierce>10</Pierce>
-    <Crush>10</Crush>
+    <Hack>10</Hack>
+    <Pierce>8</Pierce>
+    <Crush>7</Crush>
   </Armour>
   <Attack>
     <Melee>
