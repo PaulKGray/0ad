@@ -13,12 +13,6 @@
 	  Village
 	</VisibleClasses>
   </Identity>
-  <ProductionQueue>
-    <Technologies datatype="tokens">
-	  -pair_inf_armor_03
-	  -pair_inf_armor_04
-    </Technologies>
-  </ProductionQueue>
   <VisualActor>
     <Actor>structures/celts/blacksmith.xml</Actor>
   </VisualActor>
