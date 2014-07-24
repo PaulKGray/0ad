@@ -425,19 +425,18 @@ void ErrorReporter(JSContext* cx, const char* message, JSErrorReport* report)
 	msg << message;
 
 	// If there is an exception, then print its stack trace
-	JS::RootedValue excn(cx);
-	if (JS_GetPendingException(cx, excn.address()) && excn.isObject())
+	jsval excn;
+	if (JS_GetPendingException(cx, &excn) && excn.isObject())
 	{
-		JS::RootedObject excnObj(cx, &excn.toObject());
 		// TODO: this violates the docs ("The error reporter callback must not reenter the JSAPI.")
 
 		// Hide the exception from EvaluateScript
 		JSExceptionState* excnState = JS_SaveExceptionState(cx);
 		JS_ClearPendingException(cx);
 
-		JS::RootedValue rval(cx);
+		jsval rval;
 		const char dumpStack[] = "this.stack.trimRight().replace(/^/mg, '  ')"; // indent each line
-		if (JS_EvaluateScript(cx, excnObj, dumpStack, ARRAY_SIZE(dumpStack)-1, "(eval)", 1, rval.address()))
+		if (JS_EvaluateScript(cx, &excn.toObject(), dumpStack, ARRAY_SIZE(dumpStack)-1, "(eval)", 1, &rval))
 		{
 			std::string stackTrace;
 			if (ScriptInterface::FromJSVal(cx, rval, stackTrace))
@@ -465,82 +464,80 @@ void ErrorReporter(JSContext* cx, const char* message, JSErrorReport* report)
 
 JSBool print(JSContext* cx, uint argc, jsval* vp)
 {
-	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-	for (uint i = 0; i < args.length(); ++i)
+	for (uint i = 0; i < argc; ++i)
 	{
 		std::wstring str;
-		if (!ScriptInterface::FromJSVal(cx, args.handleAt(i), str))
+		if (!ScriptInterface::FromJSVal(cx, JS_ARGV(cx, vp)[i], str))
 			return JS_FALSE;
 		debug_printf(L"%ls", str.c_str());
 	}
 	fflush(stdout);
-	args.rval().setUndefined();
+	JS_SET_RVAL(cx, vp, JSVAL_VOID);
 	return JS_TRUE;
 }
 
 JSBool logmsg(JSContext* cx, uint argc, jsval* vp)
 {
-	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-	if (args.length() < 1)
+	if (argc < 1)
 	{
-		args.rval().setUndefined();
+		JS_SET_RVAL(cx, vp, JSVAL_VOID);
 		return JS_TRUE;
 	}
 
 	std::wstring str;
-	if (!ScriptInterface::FromJSVal(cx, args.handleAt(0), str))
+	if (!ScriptInterface::FromJSVal(cx, JS_ARGV(cx, vp)[0], str))
 		return JS_FALSE;
 	LOGMESSAGE(L"%ls", str.c_str());
-	args.rval().setUndefined();
+	JS_SET_RVAL(cx, vp, JSVAL_VOID);
 	return JS_TRUE;
 }
 
 JSBool warn(JSContext* cx, uint argc, jsval* vp)
 {
-	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-	if (args.length() < 1)
+	if (argc < 1)
 	{
-		args.rval().setUndefined();
+		JS_SET_RVAL(cx, vp, JSVAL_VOID);
 		return JS_TRUE;
 	}
 
 	std::wstring str;
-	if (!ScriptInterface::FromJSVal(cx, args.handleAt(0), str))
+	if (!ScriptInterface::FromJSVal(cx, JS_ARGV(cx, vp)[0], str))
 		return JS_FALSE;
 	LOGWARNING(L"%ls", str.c_str());
-	args.rval().setUndefined();
+	JS_SET_RVAL(cx, vp, JSVAL_VOID);
 	return JS_TRUE;
 }
 
 JSBool error(JSContext* cx, uint argc, jsval* vp)
 {
-	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-	if (args.length() < 1)
+	if (argc < 1)
 	{
-		args.rval().setUndefined();
+		JS_SET_RVAL(cx, vp, JSVAL_VOID);
 		return JS_TRUE;
 	}
 
 	std::wstring str;
-	if (!ScriptInterface::FromJSVal(cx, args.handleAt(0), str))
+	if (!ScriptInterface::FromJSVal(cx, JS_ARGV(cx, vp)[0], str))
 		return JS_FALSE;
 	LOGERROR(L"%ls", str.c_str());
-	args.rval().setUndefined();
+	JS_SET_RVAL(cx, vp, JSVAL_VOID);
 	return JS_TRUE;
 }
 
 JSBool deepcopy(JSContext* cx, uint argc, jsval* vp)
 {
-	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-	if (args.length() < 1)
+	if (argc < 1)
 	{
-		args.rval().setUndefined();
+		JS_SET_RVAL(cx, vp, JSVAL_VOID);
 		return JS_TRUE;
 	}
 
-	if (!JS_StructuredClone(cx, args[0], args.rval().address(), NULL, NULL))
+	jsval ret;
+
+	if (!JS_StructuredClone(cx, JS_ARGV(cx, vp)[0], &ret, NULL, NULL))
 		return JS_FALSE;
 
+	JS_SET_RVAL(cx, vp, ret);
 	return JS_TRUE;
 }
 
@@ -548,11 +545,10 @@ JSBool ProfileStart(JSContext* cx, uint argc, jsval* vp)
 {
 	const char* name = "(ProfileStart)";
 
-	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-	if (args.length() >= 1)
+	if (argc >= 1)
 	{
 		std::string str;
-		if (!ScriptInterface::FromJSVal(cx, args.handleAt(0), str))
+		if (!ScriptInterface::FromJSVal(cx, JS_ARGV(cx, vp)[0], str))
 			return JS_FALSE;
 
 		typedef boost::flyweight<
@@ -569,19 +565,18 @@ JSBool ProfileStart(JSContext* cx, uint argc, jsval* vp)
 
 	g_Profiler2.RecordRegionEnter(name);
 
-	args.rval().setUndefined();
+	JS_SET_RVAL(cx, vp, JSVAL_VOID);
 	return JS_TRUE;
 }
 
 JSBool ProfileStop(JSContext* UNUSED(cx), uint UNUSED(argc), jsval* vp)
 {
-	JS::CallReceiver rec = JS::CallReceiverFromVp(vp);
 	if (CProfileManager::IsInitialised() && ThreadUtil::IsMainThread())
 		g_Profiler.Stop();
 
 	g_Profiler2.RecordRegionLeave("(ProfileStop)");
 
-	rec.rval().setUndefined();
+	JS_SET_RVAL(cx, vp, JSVAL_VOID);
 	return JS_TRUE;
 }
 
@@ -605,12 +600,12 @@ static double generate_uniform_real(boost::rand48& rng, double min, double max)
 
 JSBool Math_random(JSContext* cx, uint UNUSED(argc), jsval* vp)
 {
-	JS::CallReceiver rec = JS::CallReceiverFromVp(vp);
 	double r;
 	if(!ScriptInterface::GetScriptInterfaceAndCBData(cx)->pScriptInterface->MathRandom(r))
 		return JS_FALSE;
 
-	rec.rval().setNumber(r);
+	jsval rv = JS::NumberValue(r);
+	JS_SET_RVAL(cx, vp, rv);
 	return JS_TRUE;
 }
 
@@ -946,7 +941,7 @@ void ScriptInterface::DefineCustomObjectType(JSClass *clasp, JSNative constructo
 
 	CustomType type;
 
-	type.m_Prototype = obj;
+	type.m_Object = obj;
 	type.m_Class = clasp;
 	type.m_Constructor = constructor;
 
@@ -960,19 +955,19 @@ JSObject* ScriptInterface::CreateCustomObject(const std::string & typeName)
 	if (it == m_CustomObjectTypes.end())
 		throw PSERROR_Scripting_TypeDoesNotExist();
 
-	JS::RootedObject prototype(m->m_cx, (*it).second.m_Prototype);
-	return JS_NewObject(m->m_cx, (*it).second.m_Class, prototype, NULL);
+	JSFunction* ctor = JS_NewFunction(m->m_cx, (*it).second.m_Constructor, 0, 0,
+               NULL, "ctor_fun");
+	return JS_New(m->m_cx, JS_GetFunctionObject(ctor), 0, NULL);
 }
+
 
 bool ScriptInterface::CallFunctionVoid(jsval val, const char* name)
 {
-	JSAutoRequest rq(m->m_cx);
-	JS::RootedValue jsRet(m->m_cx);
-	JS::RootedValue val1(m->m_cx, val);
-	return CallFunction_(val1, name, 0, NULL, &jsRet);
+	jsval jsRet;
+	return CallFunction_(val, name, 0, NULL, jsRet);
 }
 
-bool ScriptInterface::CallFunction_(JS::HandleValue val, const char* name, uint argc, jsval* argv, JS::MutableHandleValue ret)
+bool ScriptInterface::CallFunction_(jsval val, const char* name, uint argc, jsval* argv, jsval& ret)
 {
 	JSAutoRequest rq(m->m_cx);
 	JS::RootedObject obj(m->m_cx);
@@ -985,7 +980,7 @@ bool ScriptInterface::CallFunction_(JS::HandleValue val, const char* name, uint 
 	if (!JS_HasProperty(m->m_cx, obj, name, &found) || !found)
 		return JS_FALSE;
 
-	bool ok = JS_CallFunctionName(m->m_cx, obj, name, argc, argv, ret.address());
+	bool ok = JS_CallFunctionName(m->m_cx, obj, name, argc, argv, &ret);
 
 	return ok;
 }
@@ -1267,26 +1262,25 @@ bool ScriptInterface::LoadGlobalScriptFile(const VfsPath& path)
 
 bool ScriptInterface::Eval(const char* code)
 {
-	JSAutoRequest rq(m->m_cx);
-	JS::RootedValue rval(m->m_cx);
-	return Eval_(code, &rval);
+	jsval rval;
+	return Eval_(code, rval);
 }
 
-bool ScriptInterface::Eval_(const char* code, JS::MutableHandleValue rval)
+bool ScriptInterface::Eval_(const char* code, jsval& rval)
 {
 	JSAutoRequest rq(m->m_cx);
 	utf16string codeUtf16(code, code+strlen(code));
 
-	bool ok = JS_EvaluateUCScript(m->m_cx, m->m_glob, (const jschar*)codeUtf16.c_str(), (uint)codeUtf16.length(), "(eval)", 1, rval.address());
+	bool ok = JS_EvaluateUCScript(m->m_cx, m->m_glob, (const jschar*)codeUtf16.c_str(), (uint)codeUtf16.length(), "(eval)", 1, &rval);
 	return ok;
 }
 
-bool ScriptInterface::Eval_(const wchar_t* code, JS::MutableHandleValue rval)
+bool ScriptInterface::Eval_(const wchar_t* code, jsval& rval)
 {
 	JSAutoRequest rq(m->m_cx);
 	utf16string codeUtf16(code, code+wcslen(code));
 
-	bool ok = JS_EvaluateUCScript(m->m_cx, m->m_glob, (const jschar*)codeUtf16.c_str(), (uint)codeUtf16.length(), "(eval)", 1, rval.address());
+	bool ok = JS_EvaluateUCScript(m->m_cx, m->m_glob, (const jschar*)codeUtf16.c_str(), (uint)codeUtf16.length(), "(eval)", 1, &rval);
 	return ok;
 }
 

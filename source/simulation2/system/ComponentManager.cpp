@@ -330,7 +330,8 @@ void CComponentManager::Script_RegisterSystemComponentType(ScriptInterface::CxPr
 
 void CComponentManager::Script_ReRegisterComponentType(ScriptInterface::CxPrivate* pCxPrivate, int iid, std::string cname, CScriptVal ctor)
 {
-	Script_RegisterComponentType_Common(pCxPrivate, iid, cname, ctor, true, false);
+	CComponentManager* componentManager = static_cast<CComponentManager*> (pCxPrivate->pCBData);
+	componentManager->Script_RegisterComponentType_Common(pCxPrivate, iid, cname, ctor, true, false);
 }
 
 void CComponentManager::Script_RegisterInterface(ScriptInterface::CxPrivate* pCxPrivate, std::string name)

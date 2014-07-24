@@ -27,7 +27,6 @@ m.TransportPlan = function(gameState, units, startIndex, endIndex, endPos)
 {
 	this.ID = m.playerGlobals[PlayerID].uniqueIDTPlans++;
 	this.debug = gameState.ai.HQ.Config.debug;
-	this.flotilla = false;   // when false, only one ship per transport ... not yet tested when true
 
 	this.endPos = endPos;
 	this.endIndex = endIndex
@@ -85,11 +84,8 @@ m.TransportPlan.prototype.countFreeSlotsOnShip = function(ship)
 	return ship.garrisonMax() - occupied;
 };
 
-m.TransportPlan.prototype.assignUnitToShip = function(gameState, ent)
+m.TransportPlan.prototype.assignUnitToShip = function(ent)
 {
-	if (this.needTransportShips)
-		return;
-
 	var self = this;
 	var done = false;
 	this.transportShips.forEach(function (ship) {
@@ -108,13 +104,8 @@ m.TransportPlan.prototype.assignUnitToShip = function(gameState, ent)
 			}
 		}
 	});
-	if (done)
-		return;
-
-	if (this.flotilla)
+	if (!done)
 		this.needTransportShips = true;
-	else
-		gameState.ai.HQ.navalManager.splitTransport(gameState, this);
 };
 
 m.TransportPlan.prototype.assignShip = function(ship)
@@ -199,7 +190,7 @@ m.TransportPlan.prototype.onBoarding = function(gameState)
 		if (!ent.getMetadata(PlayerID, "onBoard"))
 		{
 			ready = false;
-			self.assignUnitToShip(gameState, ent);
+			self.assignUnitToShip(ent);
 			if (ent.getMetadata(PlayerID, "onBoard"))
 			{
 				var shipId = ent.getMetadata(PlayerID, "onBoard");

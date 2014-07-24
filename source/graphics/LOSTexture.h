@@ -58,7 +58,7 @@ public:
 	 * The texture is in 8-bit ALPHA format.
 	 */
 	GLuint GetTexture();
-
+	
 	void InterpolateLOS();
 	GLuint GetTextureSmooth();
 
@@ -74,7 +74,7 @@ public:
 	 * coordinates, in the form expected by glLoadMatrixf.
 	 * This must only be called after BindTexture.
 	 */
-	const CMatrix3D* GetMinimapTextureMatrix();
+	const float* GetMinimapTextureMatrix();
 
 private:
 	void DeleteTexture();

@@ -38,18 +38,13 @@ m.DefenseArmy.prototype.assignUnit = function (gameState, entID)
 			break;
 		}
 
-		// already enough units against it
-		if (this.assignedAgainst[id].length > 8
-			|| (this.assignedAgainst[id].length > 5 && !eEnt.hasClass("Hero") && !eEnt.hasClass("Siege")))
-			continue;
-
 		var dist = API3.SquareVectorDistance(ent.position(), eEnt.position());
 		if (idMinAll === undefined || dist < distMinAll)
 		{
 			idMinAll = id;
 			distMinAll = dist;
 		}
-		if (this.assignedAgainst[id].length > 2)
+		if (this.assignedAgainst[id].length > 2)   // already enough units against it
 			continue;
 		if (idMin === undefined || dist < distMin)
 		{

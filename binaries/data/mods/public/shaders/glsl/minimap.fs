@@ -9,10 +9,6 @@
   varying vec3 color;
 #endif
 
-#if MINIMAP_LINE
-  uniform vec4 color;
-#endif
-
 void main()
 {
   #if MINIMAP_BASE
@@ -28,6 +24,6 @@ void main()
   #endif
 
   #if MINIMAP_LINE
-    gl_FragColor = color;
+    gl_FragColor = vec4(1.0, 0.3, 0.3, 1.0);
   #endif
 }

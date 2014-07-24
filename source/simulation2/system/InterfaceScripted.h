@@ -32,13 +32,12 @@
 		{ NULL } \
 	}; \
 	void ICmp##iname::InterfaceInit(ScriptInterface& scriptInterface) { \
-		scriptInterface.DefineCustomObjectType(&class_ICmp##iname, NULL, 0, NULL, methods_ICmp##iname, NULL, NULL); \
+		JSContext* cx = scriptInterface.GetContext(); \
+		JSAutoRequest rq(cx); \
+		JSObject* global = JS_GetGlobalForScopeChain(cx); \
+		JS_InitClass(cx, global, NULL, &class_ICmp##iname, NULL, 0, NULL, methods_ICmp##iname, NULL, NULL); \
 	} \
-	bool ICmp##iname::NewJSObject(ScriptInterface& scriptInterface, JS::MutableHandleObject out) const\
-	{ \
-		out.set(scriptInterface.CreateCustomObject("ICmp" #iname)); \
-		return true; \
-	} \
+	JSClass* ICmp##iname::GetJSClass() const { return &class_ICmp##iname; } \
 	void RegisterComponentInterface_##iname(ScriptInterface& scriptInterface) { \
 		ICmp##iname::InterfaceInit(scriptInterface); \
 	}

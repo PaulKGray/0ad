@@ -350,9 +350,6 @@ public:
 
 	bool TryLoadSharedComponent(bool hasTechs)
 	{
-		JSContext* cx = m_ScriptInterface->GetContext();
-		JSAutoRequest rq(cx);
-
 		// we don't need to load it.
 		if (!m_HasSharedComponent)
 			return false;
@@ -393,8 +390,8 @@ public:
 		
 		for (size_t i = 0; i < m_Players.size(); ++i)
 		{
-			JS::RootedValue val(cx);
-			m_ScriptInterface->ToJSVal(cx, &val, m_Players[i]->m_Player);
+			JS::Value val;
+			m_ScriptInterface->ToJSVal(m_ScriptInterface->GetContext(), val, m_Players[i]->m_Player);
 			m_ScriptInterface->SetPropertyInt(playersID.get(), i, CScriptVal(val), true);
 		}
 		
@@ -414,9 +411,9 @@ public:
 			m_ScriptInterface->SetProperty(settings.get(), "techTemplates", fakeTech, false);
 		}
 		
-		JS::AutoValueVector argv(cx);
+		JS::AutoValueVector argv(m_ScriptInterface->GetContext());
 		argv.append(settings.get());
-		m_SharedAIObj = CScriptValRooted(cx, m_ScriptInterface->CallConstructor(ctor.get(), argv.length(), argv.handleAt(0)));
+		m_SharedAIObj = CScriptValRooted(m_ScriptInterface->GetContext(),m_ScriptInterface->CallConstructor(ctor.get(), argv.length(), argv.handleAt(0)));
 	
 		
 		if (m_SharedAIObj.undefined())
@@ -452,9 +449,9 @@ public:
 		JSContext* cx = m_ScriptInterface->GetContext();
 
 		JS::RootedValue tmpVal(cx);
-		ScriptInterface::ToJSVal(cx, &tmpVal, passabilityMap);
+		ScriptInterface::ToJSVal(cx, tmpVal.get(), passabilityMap);
 		m_PassabilityMapVal = CScriptValRooted(cx, tmpVal.get());
-		ScriptInterface::ToJSVal(cx, &tmpVal, territoryMap);
+		ScriptInterface::ToJSVal(cx, tmpVal.get(), territoryMap);
 		m_TerritoryMapVal = CScriptValRooted(cx, tmpVal);
 		if (m_HasSharedComponent)
 		{
@@ -485,7 +482,7 @@ public:
 		{
 			m_PassabilityMap = passabilityMap;
 			JS::RootedValue tmpVal(cx);
-			ScriptInterface::ToJSVal(cx, &tmpVal, m_PassabilityMap);
+			ScriptInterface::ToJSVal(cx, tmpVal.get(), m_PassabilityMap);
 			m_PassabilityMapVal = CScriptValRooted(cx, tmpVal);
 		}
 
@@ -493,7 +490,7 @@ public:
 		{
 			m_TerritoryMap = territoryMap;
 			JS::RootedValue tmpVal(cx);
-			ScriptInterface::ToJSVal(cx, &tmpVal, m_TerritoryMap);
+			ScriptInterface::ToJSVal(cx, tmpVal.get(), m_TerritoryMap);
 			m_TerritoryMapVal = CScriptValRooted(cx, tmpVal);
 		}
 

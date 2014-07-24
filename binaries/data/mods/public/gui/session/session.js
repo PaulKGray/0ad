@@ -651,11 +651,14 @@ function updateHero()
 	if (!g_previousHeroHitPoints)
 		g_previousHeroHitPoints = heroState.hitpoints;
 	
-	// if the health of the hero changed since the last update, trigger the animation
+	// check, if the health of the hero changed since the last update
 	if (heroState.hitpoints < g_previousHeroHitPoints)
+	{	
+		g_previousHeroHitPoints = heroState.hitpoints;
+		// trigger the animation
 		startColorFade("heroHitOverlay", 100, 0, colorFade_attackUnit, true, smoothColorFadeRestart_attackUnit);
-
-	g_previousHeroHitPoints = heroState.hitpoints;
+		return;
+	}
 }
 
 

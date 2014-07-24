@@ -80,10 +80,10 @@ const float* CTerritoryTexture::GetTextureMatrix()
 	return &m_TextureMatrix._11;
 }
 
-const CMatrix3D* CTerritoryTexture::GetMinimapTextureMatrix()
+const float* CTerritoryTexture::GetMinimapTextureMatrix()
 {
 	ENSURE(!UpdateDirty());
-	return &m_MinimapTextureMatrix;
+	return &m_MinimapTextureMatrix._11;
 }
 
 void CTerritoryTexture::ConstructTexture(int unit)
