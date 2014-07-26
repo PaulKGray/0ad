@@ -9,7 +9,7 @@
 	<SelectionGroupName>units/mace_champion_cavalry</SelectionGroupName>
   </Identity>
   <UnitMotion>
-    <WalkSpeed>14.0</WalkSpeed>
+    <WalkSpeed>12.5</WalkSpeed>
     <Run>
       <Speed>25.0</Speed>
     </Run>

@@ -37,7 +37,7 @@
     </SoundGroups>
   </Sound>
   <UnitMotion>
-    <WalkSpeed>12.5</WalkSpeed>
+    <WalkSpeed>11</WalkSpeed>
     <Run>
       <Speed>17.0</Speed>
     </Run>
