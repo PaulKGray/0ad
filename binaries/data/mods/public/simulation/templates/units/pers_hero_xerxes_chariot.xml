@@ -55,7 +55,7 @@
     <Unit radius="2.0"/>
   </Obstruction>
   <UnitMotion>
-    <WalkSpeed>21.0</WalkSpeed>
+    <WalkSpeed>19.5</WalkSpeed>
     <Run>
       <Speed>38.0</Speed>
     </Run>

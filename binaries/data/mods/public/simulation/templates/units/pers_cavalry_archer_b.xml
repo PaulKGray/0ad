@@ -58,7 +58,7 @@ Causes trample damage to enemy units.</Tooltip>
     </Capacities>
   </ResourceGatherer>
   <UnitMotion>
-    <WalkSpeed>18.0</WalkSpeed>
+    <WalkSpeed>16.5</WalkSpeed>
     <Run>
       <Speed>35.0</Speed>
     </Run>

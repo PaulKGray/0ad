@@ -54,7 +54,7 @@
     <CanGuard>false</CanGuard>
   </UnitAI>
   <UnitMotion>
-    <WalkSpeed>11.5</WalkSpeed>
+    <WalkSpeed>10</WalkSpeed>
   </UnitMotion>
   <Vision>
     <Range>24</Range>
