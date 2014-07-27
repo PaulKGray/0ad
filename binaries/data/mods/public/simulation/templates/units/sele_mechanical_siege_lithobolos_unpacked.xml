@@ -9,7 +9,7 @@
     <State>unpacked</State>
   </Pack>
   <UnitMotion>
-    <WalkSpeed>-1.499</WalkSpeed>
+    <WalkSpeed>0.001</WalkSpeed>
     <Run>
       <Speed>0.001</Speed>
     </Run>
