@@ -10,9 +10,6 @@
   </Builder>
   <Cost>
     <BuildTime>8</BuildTime>
-    <Resources>
-      <wood>40</wood>
-    </Resources>
   </Cost>
   <Identity>
     <Civ>maur</Civ>
