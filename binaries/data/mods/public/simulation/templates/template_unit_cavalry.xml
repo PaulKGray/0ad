@@ -59,10 +59,10 @@
       <food.meat>5</food.meat>
     </Rates>
     <Capacities>
-      <food>30</food>
-      <wood>30</wood>
-      <stone>30</stone>
-      <metal>30</metal>
+      <food>20</food>
+      <wood>20</wood>
+      <stone>20</stone>
+      <metal>20</metal>
     </Capacities>
   </ResourceGatherer>
   <Selectable>
