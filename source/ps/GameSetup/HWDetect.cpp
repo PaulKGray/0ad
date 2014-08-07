@@ -320,11 +320,11 @@ void RunHardwareDetection()
 	scriptInterface.SetProperty(settings, "timer_resolution", timer_Resolution());
 
 	// Send the same data to the reporting system
-	g_UserReporter.SubmitReport("hwdetect", 11, scriptInterface.StringifyJSON(settings, false));
+	g_UserReporter.SubmitReport("hwdetect", 11, scriptInterface.StringifyJSON(&settings, false));
 
 	// Run the detection script:
-
-	scriptInterface.CallFunctionVoid(scriptInterface.GetGlobalObject(), "RunHardwareDetection", settings);
+	JS::RootedValue global(cx, scriptInterface.GetGlobalObject());
+	scriptInterface.CallFunctionVoid(global, "RunHardwareDetection", settings);
 }
 
 static void ReportGLLimits(ScriptInterface& scriptInterface, JS::HandleValue settings)

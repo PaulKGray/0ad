@@ -136,39 +136,34 @@ public:
 
 	/**
 	 * Call a constructor function, equivalent to JS "new ctor(arg)".
-	 * @return The new object; or JSVAL_VOID on failure, and logs an error message
+	 * @param ctor An object that can be used as constructor
+	 * @param argv Constructor arguments
+	 * @param out The new object; On error an error message gets logged and out is Null (out.isNull() == true).
 	 */
-	jsval CallConstructor(jsval ctor, uint argc, jsval argv);
-
-	/**
-	 * Create an object as with CallConstructor except don't actually execute the
-	 * constructor function.
-	 * @return The new object; or JSVAL_VOID on failure, and logs an error message
-	 */
-	jsval NewObjectFromConstructor(jsval ctor);
+	void CallConstructor(JS::HandleValue ctor, JS::AutoValueVector& argv, JS::MutableHandleValue out);
 
 	/**
 	 * Call the named property on the given object, with void return type and 0 arguments
 	 */
-	bool CallFunctionVoid(jsval val, const char* name);
+	bool CallFunctionVoid(JS::HandleValue val, const char* name);
 
 	/**
 	 * Call the named property on the given object, with void return type and 1 argument
 	 */
 	template<typename T0>
-	bool CallFunctionVoid(jsval val, const char* name, const T0& a0);
+	bool CallFunctionVoid(JS::HandleValue val, const char* name, const T0& a0);
 
 	/**
 	 * Call the named property on the given object, with void return type and 2 arguments
 	 */
 	template<typename T0, typename T1>
-	bool CallFunctionVoid(jsval val, const char* name, const T0& a0, const T1& a1);
+	bool CallFunctionVoid(JS::HandleValue val, const char* name, const T0& a0, const T1& a1);
 
 	/**
 	 * Call the named property on the given object, with void return type and 3 arguments
 	 */
 	template<typename T0, typename T1, typename T2>
-	bool CallFunctionVoid(jsval val, const char* name, const T0& a0, const T1& a1, const T2& a2);
+	bool CallFunctionVoid(JS::HandleValue val, const char* name, const T0& a0, const T1& a1, const T2& a2);
 
 	JSObject* CreateCustomObject(const std::string & typeName);
 	void DefineCustomObjectType(JSClass *clasp, JSNative constructor, uint minArgs, JSPropertySpec *ps, JSFunctionSpec *fs, JSPropertySpec *static_ps, JSFunctionSpec *static_fs);
@@ -270,22 +265,23 @@ public:
 	template<typename CHAR> bool Eval(const CHAR* code, JS::MutableHandleValue out);
 	template<typename T, typename CHAR> bool Eval(const CHAR* code, T& out);
 
-	std::wstring ToString(jsval obj, bool pretty = false);
+	// We have to use a mutable handle because JS_Stringify requires that for unknown reasons.
+	std::wstring ToString(JS::MutableHandleValue obj, bool pretty = false);
 
 	/**
-	 * Parse a UTF-8-encoded JSON string. Returns the undefined value on error.
+	 * Parse a UTF-8-encoded JSON string. Returns the unmodified value on error and prints an error message.
 	 */
-	CScriptValRooted ParseJSON(const std::string& string_utf8);
+	void ParseJSON(const std::string& string_utf8, JS::MutableHandleValue out);
 
 	/**
-	 * Read a JSON file. Returns the undefined value on error.
+	 * Read a JSON file. Returns the unmodified value on error and prints an error message.
 	 */
-	CScriptValRooted ReadJSONFile(const VfsPath& path);
+	void ReadJSONFile(const VfsPath& path, JS::MutableHandleValue out);
 
 	/**
 	 * Stringify to a JSON string, UTF-8 encoded. Returns an empty string on error.
 	 */
-	std::string StringifyJSON(jsval obj, bool indent = true);
+	std::string StringifyJSON(JS::MutableHandleValue obj, bool indent = true);
 	
 	/**
 	 * Report the given error message through the JS error reporting mechanism,
@@ -322,7 +318,7 @@ public:
 	 * Complex values (functions, XML, etc) won't be cloned correctly, but basic
 	 * types and cyclic references should be fine.
 	 */
-	jsval CloneValueFromOtherContext(ScriptInterface& otherContext, jsval val);
+	JS::Value CloneValueFromOtherContext(ScriptInterface& otherContext, JS::HandleValue val);
 
 	/**
 	 * Convert a jsval to a C++ type. (This might trigger GC.)
@@ -392,8 +388,8 @@ public:
 		size_t m_Size;
 	};
 
-	shared_ptr<StructuredClone> WriteStructuredClone(jsval v);
-	jsval ReadStructuredClone(const shared_ptr<StructuredClone>& ptr);
+	shared_ptr<StructuredClone> WriteStructuredClone(JS::HandleValue v);
+	void ReadStructuredClone(const shared_ptr<StructuredClone>& ptr, JS::MutableHandleValue ret);
 
 	/**
 	 * Converts |a| if needed and assigns it to |handle|.
@@ -418,8 +414,8 @@ private:
 	bool GetProperty_(JS::HandleValue obj, const char* name, JS::MutableHandleValue out);
 	bool GetPropertyInt_(JS::HandleValue obj, int name, JS::MutableHandleValue value);
 	static bool IsExceptionPending(JSContext* cx);
-	static JSClass* GetClass(JSObject* obj);
-	static void* GetPrivate(JSObject* obj);
+	static JSClass* GetClass(JS::HandleObject obj);
+	static void* GetPrivate(JS::HandleObject obj);
 
 	class CustomType
 	{
@@ -480,45 +476,42 @@ inline void ScriptInterface::AssignOrToJSVal<JS::Value>(JS::MutableHandleValue h
 }
 
 template<typename T0>
-bool ScriptInterface::CallFunctionVoid(jsval val, const char* name, const T0& a0)
+bool ScriptInterface::CallFunctionVoid(JS::HandleValue val, const char* name, const T0& a0)
 {
 	JSContext* cx = GetContext();
 	JSAutoRequest rq(cx);
 	JS::RootedValue jsRet(cx);
-	JS::RootedValue val1(cx, val);
 	JS::AutoValueVector argv(cx);
 	argv.resize(1);
 	AssignOrToJSVal(argv.handleAt(0), a0);
-	return CallFunction_(val1, name, 1, argv.begin(), &jsRet);
+	return CallFunction_(val, name, 1, argv.begin(), &jsRet);
 }
 
 template<typename T0, typename T1>
-bool ScriptInterface::CallFunctionVoid(jsval val, const char* name, const T0& a0, const T1& a1)
+bool ScriptInterface::CallFunctionVoid(JS::HandleValue val, const char* name, const T0& a0, const T1& a1)
 {
 	JSContext* cx = GetContext();
 	JSAutoRequest rq(cx);
 	JS::RootedValue jsRet(cx);
-	JS::RootedValue val1(cx, val);
 	JS::AutoValueVector argv(cx);
 	argv.resize(2);
 	AssignOrToJSVal(argv.handleAt(0), a0);
 	AssignOrToJSVal(argv.handleAt(1), a1);
-	return CallFunction_(val1, name, 2, argv.begin(), &jsRet);
+	return CallFunction_(val, name, 2, argv.begin(), &jsRet);
 }
 
 template<typename T0, typename T1, typename T2>
-bool ScriptInterface::CallFunctionVoid(jsval val, const char* name, const T0& a0, const T1& a1, const T2& a2)
+bool ScriptInterface::CallFunctionVoid(JS::HandleValue val, const char* name, const T0& a0, const T1& a1, const T2& a2)
 {
 	JSContext* cx = GetContext();
 	JSAutoRequest rq(cx);
 	JS::RootedValue jsRet(cx);
-	JS::RootedValue val1(cx, val);
 	JS::AutoValueVector argv(cx);
 	argv.resize(3);
 	AssignOrToJSVal(argv.handleAt(0), a0);
 	AssignOrToJSVal(argv.handleAt(1), a1);
 	AssignOrToJSVal(argv.handleAt(2), a2);
-	return CallFunction_(val1, name, 3, argv.begin(), &jsRet);
+	return CallFunction_(val, name, 3, argv.begin(), &jsRet);
 }
 
 template<typename T>

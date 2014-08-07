@@ -71,14 +71,14 @@ bool CGUIManager::HasPages()
 	return !m_PageStack.empty();
 }
 
-void CGUIManager::SwitchPage(const CStrW& pageName, ScriptInterface* srcScriptInterface, CScriptVal initData)
+void CGUIManager::SwitchPage(const CStrW& pageName, ScriptInterface* srcScriptInterface, JS::HandleValue initData)
 {
 	// The page stack is cleared (including the script context where initData came from),
 	// therefore we have to clone initData.
 	shared_ptr<ScriptInterface::StructuredClone> initDataClone;
-	if (initData.get() != JSVAL_VOID)
+	if (!initData.isUndefined())
 	{
-		initDataClone = srcScriptInterface->WriteStructuredClone(initData.get());
+		initDataClone = srcScriptInterface->WriteStructuredClone(initData);
 	}
 	m_PageStack.clear();
 	PushPage(pageName, initDataClone);
@@ -113,7 +113,7 @@ void CGUIManager::PopPageCB(shared_ptr<ScriptInterface::StructuredClone> args)
 	JS::RootedValue initDataVal(cx);
 	
 	if (initDataClone)
-		initDataVal.set(scriptInterface->ReadStructuredClone(initDataClone));
+		scriptInterface->ReadStructuredClone(initDataClone, &initDataVal);
 	else
 	{
 		LOGERROR(L"Called PopPageCB when initData (which should contain the callback function name) isn't set!");
@@ -142,7 +142,7 @@ void CGUIManager::PopPageCB(shared_ptr<ScriptInterface::StructuredClone> args)
 
 	JS::RootedValue argVal(cx);
 	if (args)
-		argVal.set(scriptInterface->ReadStructuredClone(args));
+		scriptInterface->ReadStructuredClone(args, &argVal);
 	if (!scriptInterface->CallFunctionVoid(global, callback.c_str(), argVal))
 	{
 		LOGERROR(L"Failed to call the callback function %hs in the page %ls", callback.c_str(), m_PageStack.back().name.c_str());
@@ -172,11 +172,15 @@ void CGUIManager::LoadPage(SGUIPage& page)
 	// If we're hotloading then try to grab some data from the previous page
 	shared_ptr<ScriptInterface::StructuredClone> hotloadData;
 	if (page.gui)
-	{	
-		CScriptVal hotloadDataVal;
-		shared_ptr<ScriptInterface> scriptInterface = page.gui->GetScriptInterface(); 
-		scriptInterface->CallFunction(scriptInterface->GetGlobalObject(), "getHotloadData", hotloadDataVal); 
-		hotloadData = scriptInterface->WriteStructuredClone(hotloadDataVal.get()); 
+	{
+		shared_ptr<ScriptInterface> scriptInterface = page.gui->GetScriptInterface();
+		JSContext* cx = scriptInterface->GetContext();
+		JSAutoRequest rq(cx);
+		
+		JS::RootedValue global(cx, scriptInterface->GetGlobalObject());
+		JS::RootedValue hotloadDataVal(cx);
+		scriptInterface->CallFunction(global, "getHotloadData", &hotloadDataVal); 
+		hotloadData = scriptInterface->WriteStructuredClone(hotloadDataVal);
 	}
 		
 	page.inputs.clear();
@@ -228,16 +232,20 @@ void CGUIManager::LoadPage(SGUIPage& page)
 	page.gui->SendEventToAll("load");
 
 	shared_ptr<ScriptInterface> scriptInterface = page.gui->GetScriptInterface();
-	CScriptVal initDataVal;
-	CScriptVal hotloadDataVal;
+	JSContext* cx = scriptInterface->GetContext();
+	JSAutoRequest rq(cx);
+	
+	JS::RootedValue initDataVal(cx);
+	JS::RootedValue hotloadDataVal(cx);
+	JS::RootedValue global(cx, scriptInterface->GetGlobalObject());
 	if (page.initData) 
-		initDataVal = scriptInterface->ReadStructuredClone(page.initData);
+		scriptInterface->ReadStructuredClone(page.initData, &initDataVal);
 	if (hotloadData)
-		hotloadDataVal = scriptInterface->ReadStructuredClone(hotloadData);
+		scriptInterface->ReadStructuredClone(hotloadData, &hotloadDataVal);
 	
 	// Call the init() function
 	if (!scriptInterface->CallFunctionVoid(
-			scriptInterface->GetGlobalObject(), 
+			global, 
 			"init", 
 			initDataVal, 
 			hotloadDataVal)
@@ -269,8 +277,9 @@ CScriptVal CGUIManager::GetSavedGameData(ScriptInterface*& pPageScriptInterface)
 	JSContext* cx = top()->GetScriptInterface()->GetContext();
 	JSAutoRequest rq(cx);
 	
+	JS::RootedValue global(cx, top()->GetGlobalObject());
 	JS::RootedValue data(cx);
-	if (!top()->GetScriptInterface()->CallFunction(top()->GetGlobalObject(), "getSavedGameData", &data))
+	if (!top()->GetScriptInterface()->CallFunction(global, "getSavedGameData", &data))
 		LOGERROR(L"Failed to call getSavedGameData() on the current GUI page");
 	pPageScriptInterface = GetScriptInterface().get();
 	return CScriptVal(data);
@@ -278,15 +287,26 @@ CScriptVal CGUIManager::GetSavedGameData(ScriptInterface*& pPageScriptInterface)
 
 std::string CGUIManager::GetSavedGameData()
 {
-	CScriptVal data;
-	top()->GetScriptInterface()->CallFunction(top()->GetGlobalObject(), "getSavedGameData", data);
-	return top()->GetScriptInterface()->StringifyJSON(data.get(), false);
+	shared_ptr<ScriptInterface> scriptInterface = top()->GetScriptInterface();
+	JSContext* cx = scriptInterface->GetContext();
+	JSAutoRequest rq(cx);
+	
+	JS::RootedValue data(cx);
+	JS::RootedValue global(cx, top()->GetGlobalObject());
+	scriptInterface->CallFunction(global, "getSavedGameData", &data);
+	return scriptInterface->StringifyJSON(&data, false);
 }
 
 void CGUIManager::RestoreSavedGameData(std::string jsonData)
 {
-	top()->GetScriptInterface()->CallFunctionVoid(top()->GetGlobalObject(), "restoreSavedGameData",
-														top()->GetScriptInterface()->ParseJSON(jsonData));
+	shared_ptr<ScriptInterface> scriptInterface = top()->GetScriptInterface();
+	JSContext* cx = scriptInterface->GetContext();
+	JSAutoRequest rq(cx);
+	
+	JS::RootedValue global(cx, top()->GetGlobalObject());
+	JS::RootedValue dataVal(cx);
+	scriptInterface->ParseJSON(jsonData, &dataVal);
+	scriptInterface->CallFunctionVoid(global, "restoreSavedGameData", dataVal);
 }
 
 InReaction CGUIManager::HandleEvent(const SDL_Event_* ev)
@@ -297,12 +317,17 @@ InReaction CGUIManager::HandleEvent(const SDL_Event_* ev)
 	// visible game area), sometimes they'll want to intercepts events before the GUI (e.g.
 	// to capture all mouse events until a mouseup after dragging).
 	// So we call two separate handler functions:
+	
+	shared_ptr<ScriptInterface> scriptInterface = top()->GetScriptInterface();
+	JSContext* cx = scriptInterface->GetContext();
+	JSAutoRequest rq(cx);
 
+	JS::RootedValue global(cx, top()->GetGlobalObject());
 	bool handled;
 
 	{
 		PROFILE("handleInputBeforeGui");
-		if (top()->GetScriptInterface()->CallFunction(top()->GetGlobalObject(), "handleInputBeforeGui", *ev, top()->FindObjectUnderMouse(), handled))
+		if (scriptInterface->CallFunction(global, "handleInputBeforeGui", *ev, top()->FindObjectUnderMouse(), handled))
 			if (handled)
 				return IN_HANDLED;
 	}
@@ -316,7 +341,8 @@ InReaction CGUIManager::HandleEvent(const SDL_Event_* ev)
 
 	{
 		PROFILE("handleInputAfterGui");
-		if (top()->GetScriptInterface()->CallFunction(top()->GetGlobalObject(), "handleInputAfterGui", *ev, handled))			if (handled)
+		if (scriptInterface->CallFunction(global, "handleInputAfterGui", *ev, handled))
+			if (handled)
 				return IN_HANDLED;
 	}
 
