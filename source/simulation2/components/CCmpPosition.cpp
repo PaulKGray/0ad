@@ -582,7 +582,7 @@ public:
 			if (cmpPosition)
 				y += cmpPosition->GetRotation().Y;
 		}
-		return CFixedVector3D(m_RotX, m_RotY, m_RotZ);
+		return CFixedVector3D(m_RotX, y, m_RotZ);
 	}
 
 	virtual fixed GetDistanceTravelled()
@@ -698,19 +698,19 @@ public:
 		float y = baseY + m_Y.ToFloat() + Interpolate(m_LastYDifference.ToFloat(), 0.f, frameOffset);
 
 		CMatrix3D m;
-		
+
 		// linear interpolation is good enough (for RotX/Z). 
 		// As you always stay close to zero angle.	
 		m.SetXRotation(Interpolate(m_LastInterpolatedRotX, m_InterpolatedRotX, frameOffset));
 		m.RotateZ(Interpolate(m_LastInterpolatedRotZ, m_InterpolatedRotZ, frameOffset));
-	
+
 		CVector3D pos(x, y, z);
 
 		pos.Y += GetConstructionProgressOffset(pos);
 
 		m.RotateY(rotY + (float)M_PI);
 		m.Translate(pos);
-		
+
 		return m;
 	}
 

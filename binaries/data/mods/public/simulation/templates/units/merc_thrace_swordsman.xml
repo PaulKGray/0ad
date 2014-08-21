@@ -34,7 +34,7 @@ Countered by: Archers, Cavalry Spearmen, and Cavalry Archers.</Tooltip>
     <BaseSpeed>0.5</BaseSpeed>
   </ResourceGatherer>
   <UnitMotion>
-    <WalkSpeed>9.5</WalkSpeed>
+    <WalkSpeed>8</WalkSpeed>
     <Run>
       <Speed>13.0</Speed>
     </Run>

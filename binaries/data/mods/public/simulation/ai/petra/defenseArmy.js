@@ -38,13 +38,18 @@ m.DefenseArmy.prototype.assignUnit = function (gameState, entID)
 			break;
 		}
 
+		// already enough units against it
+		if (this.assignedAgainst[id].length > 8
+			|| (this.assignedAgainst[id].length > 5 && !eEnt.hasClass("Hero") && !eEnt.hasClass("Siege")))
+			continue;
+
 		var dist = API3.SquareVectorDistance(ent.position(), eEnt.position());
 		if (idMinAll === undefined || dist < distMinAll)
 		{
 			idMinAll = id;
 			distMinAll = dist;
 		}
-		if (this.assignedAgainst[id].length > 2)   // already enough units against it
+		if (this.assignedAgainst[id].length > 2)
 			continue;
 		if (idMin === undefined || dist < distMin)
 		{
@@ -108,27 +113,6 @@ m.DefenseArmy.prototype.update = function (gameState)
 	var breakaways = this.onUpdate(gameState);
 
 	return breakaways;
-};
-
-m.DefenseArmy.prototype.debug = function (gameState)
-{
-	m.debug(" ");
-	m.debug ("Army " + this.ID)
-//	m.debug ("Entities " + this.foeEntities.length);
-//	m.debug ("Strength " + this.foeStrength);
-	//	debug (gameState.getEntityById(ent)._templateName + ", ID " + ent);
-	//debug ("Defenders " + this.ownEntities.length);
-	for (var ent of this.foeEntities)
-	{
-		if (gameState.getEntityById(ent) !== undefined)
-		{
-			warn(gameState.getEntityById(ent)._templateName + ", ID " + ent);
-			Engine.PostCommand(PlayerID,{"type": "set-shading-color", "entities": [ent], "rgb": [0.5,0,0]});
-		}
-		else
-			warn("ent "  + ent);
-	}
-	m.debug ("");
 };
 
 return m;

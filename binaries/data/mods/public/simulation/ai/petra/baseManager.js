@@ -112,7 +112,7 @@ m.BaseManager.prototype.checkEvents = function (gameState, events, queues)
 				// sounds like we lost our anchor. Let's try rebuilding it.
 				// TODO: currently the HQ manager sets us as initgathering, we probably ouht to do it
 				this.anchor = undefined;
-				
+
 				this.constructing = true;	// let's switch mode.
 				this.workers.forEach( function (worker) { worker.stopMoving(); });
 				queues.civilCentre.addItem(new m.ConstructionPlan(gameState, gameState.ai.HQ.bBase[0], { "base": this.ID, "baseAnchor": true }, ent.position()));
@@ -275,7 +275,7 @@ m.BaseManager.prototype.findBestDropsiteLocation = function(gameState, resource)
 	
 	var DPFoundations = gameState.getOwnFoundations().filter(API3.Filters.byType(gameState.applyCiv("foundation|structures/{civ}_storehouse")));
 
-	var ccEnts = gameState.getOwnEntities().filter(API3.Filters.byClass("CivCentre")).toEntityArray();
+	var ccEnts = gameState.getOwnStructures().filter(API3.Filters.byClass("CivCentre")).toEntityArray();
 
 	var width = obstructions.width;
 	var bestIdx = undefined;
@@ -422,7 +422,7 @@ m.BaseManager.prototype.checkResourceLevels = function (gameState, queues)
 				for (var i in queues.field.queue)
 					queues.field.queue[i].isGo = function() { return true; };	// start them
 			}
-			else if(gameState.ai.HQ.canBuild(gameState, "structures/{civ}_field"))	// let's see if we need to add new farms.
+			else if (gameState.ai.HQ.canBuild(gameState, "structures/{civ}_field"))	// let's see if we need to add new farms.
 			{
 				if ((!gameState.ai.HQ.saveResources && numFound < 2 && numFound + numQueue < 3) ||
 					(gameState.ai.HQ.saveResources && numFound < 1 && numFound + numQueue < 2))
@@ -756,7 +756,7 @@ m.BaseManager.prototype.assignToFoundations = function(gameState, noRepair)
 			targetNB = 4;
 		else if (target.hasClass("Fortress"))
 			targetNB = 7;
-		if (target.getMetadata(PlayerID, "baseAnchor") == true)
+		if (target.getMetadata(PlayerID, "baseAnchor") == true || (target.hasClass("Wonder") && gameState.getGameType() === "wonder"))
 			targetNB = 15;
 
 		if (assigned < targetNB)
@@ -816,10 +816,8 @@ m.BaseManager.prototype.assignToFoundations = function(gameState, noRepair)
 		else if (noRepair && !target.hasClass("CivCentre"))
 			continue;
 		
-		if (gameState.ai.HQ.territoryMap.getOwner(target.position()) !== PlayerID ||
-			((gameState.ai.HQ.territoryMap.getOwner([target.position()[0] + 10, target.position()[1]]) !== PlayerID)  &&
-			gameState.ai.HQ.territoryMap.getOwner([target.position()[0] - 10, target.position()[1]]) !== PlayerID))
-			continue;  // TODO find a better way to signal a decaying building
+		if (target.decaying())
+			continue;
 		
 		var assigned = gameState.getOwnEntitiesByMetadata("target-foundation", target.id()).length;
 		if (assigned < targetNB/3)
@@ -843,7 +841,8 @@ m.BaseManager.prototype.assignToFoundations = function(gameState, noRepair)
 m.BaseManager.prototype.update = function(gameState, queues, events)
 {
 	if (this.anchor && this.anchor.getMetadata(PlayerID, "access") !== this.accessIndex)
-		warn(" probleme avec accessIndex " + this.accessIndex + " et metadata " + this.anchor.getMetadata(PlayerID, "access"));
+		warn("Petra baseManager problem with accessIndex " + this.accessIndex
+			+ " while metadata acess is " + this.anchor.getMetadata(PlayerID, "access"));
 
 	Engine.ProfileStart("Base update - base " + this.ID);
 

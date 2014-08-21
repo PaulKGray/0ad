@@ -4,6 +4,7 @@ Engine.LoadComponentScript("interfaces/Auras.js");
 Engine.LoadComponentScript("interfaces/Barter.js");
 Engine.LoadComponentScript("interfaces/Builder.js");
 Engine.LoadComponentScript("interfaces/DamageReceiver.js");
+Engine.LoadComponentScript("interfaces/EndGameManager.js");
 Engine.LoadComponentScript("interfaces/EntityLimits.js");
 Engine.LoadComponentScript("interfaces/Foundation.js");
 Engine.LoadComponentScript("interfaces/GarrisonHolder.js");
@@ -34,6 +35,10 @@ AddMock(SYSTEM_ENTITY, IID_Barter, {
 		"buy": { "food": 150 },
 		"sell": { "food": 25 },
 	}},
+});
+
+AddMock(SYSTEM_ENTITY, IID_EndGameManager, {
+	GetGameType: function() { return "conquest"; }
 });
 
 AddMock(SYSTEM_ENTITY, IID_PlayerManager, {
@@ -244,6 +249,7 @@ TS_ASSERT_UNEVAL_EQUALS(cmp.GetSimulationState(), {
 	],
 	circularMap: false,
 	timeElapsed: 0,
+	gameType: "conquest",
 });
 
 TS_ASSERT_UNEVAL_EQUALS(cmp.GetExtendedSimulationState(), {
@@ -339,6 +345,7 @@ TS_ASSERT_UNEVAL_EQUALS(cmp.GetExtendedSimulationState(), {
 	],
 	circularMap: false,
 	timeElapsed: 0,
+	gameType: "conquest",
 	barterPrices: {buy: {food: 150}, sell: {food: 25}}
 });
 
@@ -391,6 +398,7 @@ TS_ASSERT_UNEVAL_EQUALS(cmp.GetEntityState(-1, 10), {
 		visibleClasses: ["class3", "class4"],
 		selectionGroupName: "Selection Group Name",
 	},
+	fogging: null,
 	foundation: null,
 	garrisonHolder: null,
 	gate: null,
@@ -418,6 +426,7 @@ TS_ASSERT_UNEVAL_EQUALS(cmp.GetExtendedEntityState(-1, 10), {
 	},
 	buildingAI: null,
 	healer: null,
+	mirage: null,
 	obstruction: null,
 	turretParent: null,
 	promotion: null,

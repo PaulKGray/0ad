@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 Wildfire Games.
+/* Copyright (C) 2014 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -75,17 +75,22 @@ CReplayLogger::~CReplayLogger()
 	delete m_Stream;
 }
 
-void CReplayLogger::StartGame(const CScriptValRooted& attribs)
+void CReplayLogger::StartGame(JS::MutableHandleValue attribs)
 {
-	*m_Stream << "start " << m_ScriptInterface.StringifyJSON(attribs.get(), false) << "\n";
+	*m_Stream << "start " << m_ScriptInterface.StringifyJSON(attribs, false) << "\n";
 }
 
 void CReplayLogger::Turn(u32 n, u32 turnLength, const std::vector<SimulationCommand>& commands)
 {
+	JSContext* cx = m_ScriptInterface.GetContext();
+	JSAutoRequest rq(cx);
+	
 	*m_Stream << "turn " << n << " " << turnLength << "\n";
 	for (size_t i = 0; i < commands.size(); ++i)
 	{
-		*m_Stream << "cmd " << commands[i].player << " " << m_ScriptInterface.StringifyJSON(commands[i].data.get(), false) << "\n";
+		// TODO: Check if this temporary root can be removed after SpiderMonkey 31 upgrade 
+		JS::RootedValue tmpCommand(cx, commands[i].data.get());
+		*m_Stream << "cmd " << commands[i].player << " " << m_ScriptInterface.StringifyJSON(&tmpCommand, false) << "\n";
 	}
 	*m_Stream << "end\n";
 	m_Stream->flush();
@@ -119,7 +124,7 @@ void CReplayPlayer::Load(const std::string& path)
 	ENSURE(m_Stream->good());
 }
 
-void CReplayPlayer::Replay()
+void CReplayPlayer::Replay(bool serializationtest)
 {
 	ENSURE(m_Stream);
 
@@ -131,6 +136,11 @@ void CReplayPlayer::Replay()
 
 	CGame game(true);
 	g_Game = &game;
+	if (serializationtest)
+		game.GetSimulation2()->EnableSerializationTest();
+		
+	JSContext* cx = game.GetSimulation2()->GetScriptInterface().GetContext();
+	JSAutoRequest rq(cx);
 
 	// Need some stuff for terrain movement costs:
 	// (TODO: this ought to be independent of any graphics code)
@@ -153,9 +163,10 @@ void CReplayPlayer::Replay()
 		{
 			std::string line;
 			std::getline(*m_Stream, line);
-			CScriptValRooted attribs = game.GetSimulation2()->GetScriptInterface().ParseJSON(line);
+			JS::RootedValue attribs(cx);
+			game.GetSimulation2()->GetScriptInterface().ParseJSON(line, &attribs);
 
-			game.StartGame(attribs, "");
+			game.StartGame(CScriptValRooted(cx, attribs), "");
 
 			// TODO: Non progressive load can fail - need a decent way to handle this
 			LDR_NonprogressiveLoad();
@@ -175,9 +186,10 @@ void CReplayPlayer::Replay()
 
 			std::string line;
 			std::getline(*m_Stream, line);
-			CScriptValRooted data = game.GetSimulation2()->GetScriptInterface().ParseJSON(line);
+			JS::RootedValue data(cx);
+			game.GetSimulation2()->GetScriptInterface().ParseJSON(line, &data);
 
-			SimulationCommand cmd = { player, data };
+			SimulationCommand cmd = { player, CScriptValRooted(cx, data) };
 			commands.push_back(cmd);
 		}
 		else if (type == "hash" || type == "hash-quick")

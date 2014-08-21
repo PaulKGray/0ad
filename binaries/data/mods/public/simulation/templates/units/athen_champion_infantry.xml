@@ -8,7 +8,7 @@
     <Icon>units/athen_champion_infantry.png</Icon>
   </Identity>
   <UnitMotion>
-    <WalkSpeed>11.5</WalkSpeed>
+    <WalkSpeed>10</WalkSpeed>
     <Run>
       <Speed>16.0</Speed>
     </Run>

@@ -59,10 +59,10 @@
       <food.meat>5</food.meat>
     </Rates>
     <Capacities>
-      <food>30</food>
-      <wood>30</wood>
-      <stone>30</stone>
-      <metal>30</metal>
+      <food>20</food>
+      <wood>20</wood>
+      <stone>20</stone>
+      <metal>20</metal>
     </Capacities>
   </ResourceGatherer>
   <Selectable>
@@ -70,8 +70,7 @@
       <Texture>
         <MainTexture>circle/128x128.png</MainTexture>
         <MainTextureMask>circle/128x128_mask.png</MainTextureMask>
-        <!--<MainTexture>arrow/256x256.png</MainTexture>
-       <MainTextureMask>arrow/256x256_mask.png</MainTextureMask>-->
+        
       </Texture>
     </Overlay>
   </Selectable>
@@ -95,7 +94,7 @@
     <HeightOffset>6.5</HeightOffset>
   </StatusBars>
   <UnitMotion>
-    <WalkSpeed>16.0</WalkSpeed>
+    <WalkSpeed>14.5</WalkSpeed>
     <Run>
       <Speed>26.0</Speed>
       <Range>600.0</Range>

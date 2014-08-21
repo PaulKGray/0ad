@@ -651,14 +651,11 @@ function updateHero()
 	if (!g_previousHeroHitPoints)
 		g_previousHeroHitPoints = heroState.hitpoints;
 	
-	// check, if the health of the hero changed since the last update
+	// if the health of the hero changed since the last update, trigger the animation
 	if (heroState.hitpoints < g_previousHeroHitPoints)
-	{	
-		g_previousHeroHitPoints = heroState.hitpoints;
-		// trigger the animation
 		startColorFade("heroHitOverlay", 100, 0, colorFade_attackUnit, true, smoothColorFadeRestart_attackUnit);
-		return;
-	}
+
+	g_previousHeroHitPoints = heroState.hitpoints;
 }
 
 
@@ -879,16 +876,12 @@ function playRandomAmbient(type)
 	switch (type)
 	{
 		case AMBIENT_TEMPERATE:
-			// Seem to need the underscore at the end of "temperate" to avoid crash
-			// (Might be caused by trying to randomly load day_temperate.xml)
-//			currentAmbient = newRandomSound("ambient", "temperate_", "dayscape");
-
 			const AMBIENT = "audio/ambient/dayscape/day_temperate_gen_03.ogg";
-			Engine.PlayAmbientSound( AMBIENT, true );
+			Engine.PlayAmbientSound(AMBIENT, true);
 			break;
 
 		default:
-			Engine.Console_Write(sprintf(translate("Unrecognized ambient type: %(ambientType)s"), { ambientType: type }));
+			error("Unrecognized ambient type: '" + type + "'");
 			break;
 	}
 }

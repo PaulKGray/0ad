@@ -117,6 +117,10 @@ GuiInterface.prototype.GetSimulationState = function(player)
 	var cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
 	ret.timeElapsed = cmpTimer.GetTime();
 
+	// and the game type
+	var cmpEndGameManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_EndGameManager);
+	ret.gameType = cmpEndGameManager.GetGameType();
+
 	return ret;
 };
 
@@ -171,6 +175,7 @@ GuiInterface.prototype.GetEntityState = function(player, ent)
 		"alertRaiser": null,
 		"buildEntities": null,
 		"identity": null,
+		"fogging": null,
 		"foundation": null,
 		"garrisonHolder": null,
 		"gate": null,
@@ -185,6 +190,9 @@ GuiInterface.prototype.GetEntityState = function(player, ent)
 		"unitAI": null,
 		"visibility": null,
 	};
+
+	// Used for several components
+	var cmpMirage = Engine.QueryInterface(ent, IID_Mirage);
 
 	var cmpIdentity = Engine.QueryInterface(ent, IID_Identity);
 	if (cmpIdentity)
@@ -211,6 +219,12 @@ GuiInterface.prototype.GetEntityState = function(player, ent)
 		ret.maxHitpoints = cmpHealth.GetMaxHitpoints();
 		ret.needsRepair = cmpHealth.IsRepairable() && (cmpHealth.GetHitpoints() < cmpHealth.GetMaxHitpoints());
 		ret.needsHeal = !cmpHealth.IsUnhealable();
+	}
+	if (cmpMirage && cmpMirage.Health())
+	{
+		ret.hitpoints = cmpMirage.GetHitpoints();
+		ret.maxHitpoints = cmpMirage.GetMaxHitpoints();
+		ret.needsRepair = cmpMirage.NeedsRepair();
 	}
 
 	var cmpBuilder = Engine.QueryInterface(ent, IID_Builder);
@@ -247,12 +261,27 @@ GuiInterface.prototype.GetEntityState = function(player, ent)
 		};
 	}
 
+	var cmpFogging = Engine.QueryInterface(ent, IID_Fogging);
+	if (cmpFogging)
+	{
+		if (cmpFogging.IsMiraged(player))
+			ret.fogging = {"mirage": cmpFogging.GetMirage(player)};
+		else
+			ret.fogging = {"mirage": null};
+	}
+
 	var cmpFoundation = Engine.QueryInterface(ent, IID_Foundation);
 	if (cmpFoundation)
 	{
 		ret.foundation = {
 			"progress": cmpFoundation.GetBuildPercentage(),
 			"numBuilders": cmpFoundation.GetNumBuilders()
+		};
+	}
+	if (cmpMirage && cmpMirage.Foundation())
+	{
+		ret.foundation = {
+			"progress": cmpMirage.GetBuildPercentage()
 		};
 	}
 
@@ -338,6 +367,7 @@ GuiInterface.prototype.GetExtendedEntityState = function(player, ent)
 		"barterMarket": null,
 		"buildingAI": null,
 		"healer": null,
+		"mirage": null,
 		"obstruction": null,
 		"turretParent":null,
 		"promotion": null,
@@ -346,6 +376,10 @@ GuiInterface.prototype.GetExtendedEntityState = function(player, ent)
 		"resourceGatherRates": null,
 		"resourceSupply": null,
 	};
+
+	var cmpMirage = Engine.QueryInterface(ent, IID_Mirage);
+	if (cmpMirage)
+		ret.mirage = true;
 
 	var cmpIdentity = Engine.QueryInterface(ent, IID_Identity);
 
@@ -439,6 +473,15 @@ GuiInterface.prototype.GetExtendedEntityState = function(player, ent)
 			"killBeforeGather": cmpResourceSupply.GetKillBeforeGather(),
 			"maxGatherers": cmpResourceSupply.GetMaxGatherers(),
 			"gatherers": cmpResourceSupply.GetGatherers()
+		};
+	}
+	if (cmpMirage && cmpMirage.ResourceSupply())
+	{
+		ret.resourceSupply = {
+			"max": cmpMirage.GetMaxAmount(),
+			"amount": cmpMirage.GetAmount(),
+			"type": cmpMirage.GetType(),
+			"isInfinite": cmpMirage.IsInfinite()
 		};
 	}
 

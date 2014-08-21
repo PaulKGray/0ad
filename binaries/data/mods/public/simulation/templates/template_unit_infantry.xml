@@ -115,7 +115,7 @@
     <Max>1000</Max>
   </Stamina>
   <UnitMotion>
-    <WalkSpeed>10.5</WalkSpeed>
+    <WalkSpeed>9</WalkSpeed>
     <Run>
       <Speed>18.75</Speed>
     </Run>

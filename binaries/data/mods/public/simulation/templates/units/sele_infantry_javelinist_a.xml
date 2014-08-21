@@ -21,7 +21,7 @@
     <Entity>units/sele_infantry_javelinist_e</Entity>
   </Promotion>
   <UnitMotion>
-    <WalkSpeed>11.5</WalkSpeed>
+    <WalkSpeed>10</WalkSpeed>
     <Run>
       <Speed>21.25</Speed>
     </Run>

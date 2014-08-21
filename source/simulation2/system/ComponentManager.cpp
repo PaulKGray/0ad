@@ -147,11 +147,13 @@ bool CComponentManager::LoadScript(const VfsPath& filename, bool hotload)
 	return ok;
 }
 
-void CComponentManager::Script_RegisterComponentType_Common(ScriptInterface::CxPrivate* pCxPrivate, int iid, std::string cname, CScriptVal ctor, bool reRegister, bool systemComponent)
+void CComponentManager::Script_RegisterComponentType_Common(ScriptInterface::CxPrivate* pCxPrivate, int iid, std::string cname, CScriptVal ctor1, bool reRegister, bool systemComponent)
 {
 	CComponentManager* componentManager = static_cast<CComponentManager*> (pCxPrivate->pCBData);
 	JSContext* cx = componentManager->m_ScriptInterface.GetContext();
 	JSAutoRequest rq(cx);
+	
+	JS::RootedValue ctor(cx, ctor1.get()); // TODO: Get Handle parameter directly with SpiderMonkey 31
 
 	// Find the C++ component that wraps the interface
 	int cidWrapper = componentManager->GetScriptWrapper(iid);
@@ -231,11 +233,11 @@ void CComponentManager::Script_RegisterComponentType_Common(ScriptInterface::CxP
 
 	std::string schema = "<empty/>";
 	{
-		CScriptValRooted prototype;
-		if (componentManager->m_ScriptInterface.GetProperty(ctor.get(), "prototype", prototype) &&
-			componentManager->m_ScriptInterface.HasProperty(prototype.get(), "Schema"))
+		JS::RootedValue prototype(cx);
+		if (componentManager->m_ScriptInterface.GetProperty(ctor, "prototype", &prototype) &&
+			componentManager->m_ScriptInterface.HasProperty(prototype, "Schema"))
 		{
-			componentManager->m_ScriptInterface.GetProperty(prototype.get(), "Schema", schema);
+			componentManager->m_ScriptInterface.GetProperty(prototype, "Schema", schema);
 		}
 	}
 
@@ -256,7 +258,7 @@ void CComponentManager::Script_RegisterComponentType_Common(ScriptInterface::CxP
 
 	// Find all the ctor prototype's On* methods, and subscribe to the appropriate messages:
 	JS::RootedValue protoVal(cx);
-	if (!componentManager->m_ScriptInterface.GetPropertyJS(ctor.get(), "prototype", &protoVal))
+	if (!componentManager->m_ScriptInterface.GetProperty(ctor, "prototype", &protoVal))
 		return; // error
 
 	std::vector<std::string> methods;
@@ -330,8 +332,7 @@ void CComponentManager::Script_RegisterSystemComponentType(ScriptInterface::CxPr
 
 void CComponentManager::Script_ReRegisterComponentType(ScriptInterface::CxPrivate* pCxPrivate, int iid, std::string cname, CScriptVal ctor)
 {
-	CComponentManager* componentManager = static_cast<CComponentManager*> (pCxPrivate->pCBData);
-	componentManager->Script_RegisterComponentType_Common(pCxPrivate, iid, cname, ctor, true, false);
+	Script_RegisterComponentType_Common(pCxPrivate, iid, cname, ctor, true, false);
 }
 
 void CComponentManager::Script_RegisterInterface(ScriptInterface::CxPrivate* pCxPrivate, std::string name)
@@ -698,7 +699,6 @@ void CComponentManager::AddSystemComponents(bool skipScriptedComponents, bool sk
 	// Add scripted system components:
 	if (!skipScriptedComponents)
 	{
-
 		for (uint32_t i = 0; i < m_ScriptedSystemComponents.size(); ++i)
 			AddComponent(m_SystemEntity, m_ScriptedSystemComponents[i], noParam);
 		if (!skipAI)
@@ -708,6 +708,9 @@ void CComponentManager::AddSystemComponents(bool skipScriptedComponents, bool sk
 
 IComponent* CComponentManager::ConstructComponent(CEntityHandle ent, ComponentTypeId cid)
 {
+	JSContext* cx = m_ScriptInterface.GetContext();
+	JSAutoRequest rq(cx);
+	
 	std::map<ComponentTypeId, ComponentType>::const_iterator it = m_ComponentTypesById.find(cid);
 	if (it == m_ComponentTypesById.end())
 	{
@@ -729,11 +732,14 @@ IComponent* CComponentManager::ConstructComponent(CEntityHandle ent, ComponentTy
 	std::map<entity_id_t, IComponent*>& emap2 = m_ComponentsByTypeId[cid];
 
 	// If this is a scripted component, construct the appropriate JS object first
-	jsval obj = JSVAL_NULL;
+	JS::RootedValue obj(cx);
+	// TODO: Check if this temporary root can be removed after SpiderMonkey 31 upgrade 
+	JS::RootedValue tmpCtor(cx, ct.ctor.get());
 	if (ct.type == CT_Script)
 	{
-		obj = m_ScriptInterface.CallConstructor(ct.ctor.get(), 0, JSVAL_VOID);
-		if (JSVAL_IS_VOID(obj))
+		JS::AutoValueVector argv(cx); // TODO: With SpiderMonkey 31, we can pass JS::HandleValueArray::empty()
+		m_ScriptInterface.CallConstructor(tmpCtor, argv, &obj);
+		if (obj.isNull())
 		{
 			LOGERROR(L"Script component constructor failed");
 			return NULL;
@@ -1141,13 +1147,16 @@ CScriptVal CComponentManager::Script_ReadCivJSONFile(ScriptInterface::CxPrivate*
 	return ReadJSONFile(pCxPrivate, L"civs", fileName);
 }
 
-CScriptVal CComponentManager::ReadJSONFile(ScriptInterface::CxPrivate* pCxPrivate, std::wstring filePath, std::wstring fileName)
+JS::Value CComponentManager::ReadJSONFile(ScriptInterface::CxPrivate* pCxPrivate, std::wstring filePath, std::wstring fileName)
 {
 	CComponentManager* componentManager = static_cast<CComponentManager*> (pCxPrivate->pCBData);
+	JSContext* cx = pCxPrivate->pScriptInterface->GetContext();
+	JSAutoRequest rq(cx);
 
 	VfsPath path = VfsPath(filePath) / fileName;
-
-	return componentManager->GetScriptInterface().ReadJSONFile(path).get();
+	JS::RootedValue out(cx);
+	componentManager->GetScriptInterface().ReadJSONFile(path, &out);
+	return out.get();
 }
 	
 Status CComponentManager::FindJSONFilesCallback(const VfsPath& pathname, const CFileInfo& UNUSED(fileInfo), const uintptr_t cbData)
