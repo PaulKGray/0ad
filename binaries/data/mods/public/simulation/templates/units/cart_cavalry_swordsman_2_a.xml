@@ -7,7 +7,7 @@
   </Armour>
   <Attack>
     <Melee>
-      <Hack>21.0</Hack>
+      <Hack>15</Hack>
     </Melee>
     <Charge>
       <Hack>63.0</Hack>

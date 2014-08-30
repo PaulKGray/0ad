@@ -2,7 +2,7 @@
 <Entity parent="template_unit_champion_infantry_swordsman">
   <Attack>
     <Melee>
-      <Hack>0.0</Hack>
+      <Hack>0</Hack>
       <Crush>10.0</Crush>
     </Melee>
     <Charge>

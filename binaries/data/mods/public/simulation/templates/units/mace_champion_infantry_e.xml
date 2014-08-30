@@ -2,8 +2,8 @@
 <Entity parent="units/mace_champion_infantry_a">
   <Attack>
     <Melee>
-      <Hack>12.0</Hack>
-      <Pierce>24.0</Pierce>
+      <Hack>8.5</Hack>
+      <Pierce>17</Pierce>
     </Melee>
     <Charge>
       <Hack>16.0</Hack>

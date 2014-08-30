@@ -13,8 +13,8 @@
       <MaxRange>4.0</MaxRange>
     </Slaughter>
     <Melee>
-      <Hack>10.0</Hack>
-      <Pierce>0.0</Pierce>
+      <Hack>7</Hack>
+      <Pierce>0</Pierce>
       <Crush>0.0</Crush>
       <MaxRange>3.0</MaxRange>
       <RepeatTime>1000</RepeatTime>

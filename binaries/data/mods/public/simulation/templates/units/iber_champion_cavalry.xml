@@ -2,8 +2,8 @@
 <Entity parent="template_unit_champion_cavalry_javelinist">
   <Attack>
     <Ranged>
-      <Pierce>0.0</Pierce>
-      <Crush>10.0</Crush>
+      <Pierce>0</Pierce>
+      <Crush>7</Crush>
       <MaxRange>48</MaxRange>
     </Ranged>
   </Attack>

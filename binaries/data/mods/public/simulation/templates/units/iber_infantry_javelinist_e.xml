@@ -7,8 +7,8 @@
   </Armour>
   <Attack>
     <Ranged>
-      <Pierce>10.0</Pierce>
-      <Crush>10.0</Crush>
+      <Pierce>7</Pierce>
+      <Crush>7</Crush>
       <Spread>1.0</Spread>
       <MaxRange>48</MaxRange>
     </Ranged>

@@ -7,8 +7,8 @@
   </Armour>
   <Attack>
     <Melee>
-      <Hack>8.0</Hack>
-      <Pierce>16.0</Pierce>
+      <Hack>6</Hack>
+      <Pierce>11.5</Pierce>
     </Melee>
     <Charge>
       <Hack>16.0</Hack>

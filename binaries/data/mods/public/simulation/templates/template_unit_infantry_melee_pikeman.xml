@@ -7,8 +7,8 @@
   </Armour>
   <Attack>
     <Melee>
-      <Hack>4.0</Hack>
-      <Pierce>8.0</Pierce>
+      <Hack>3</Hack>
+      <Pierce>6</Pierce>
       <MaxRange>8.0</MaxRange>
     </Melee>
     <Charge>
