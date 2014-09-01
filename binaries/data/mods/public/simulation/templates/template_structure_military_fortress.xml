@@ -75,7 +75,7 @@
   <ProductionQueue>
     <BatchTimeModifier>0.8</BatchTimeModifier>
     <Technologies datatype="tokens">
-      pair_champ_02
+      attack_soldiers_will
     </Technologies>
   </ProductionQueue>
   <Sound>
