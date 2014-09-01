@@ -15,7 +15,7 @@
       <Hack>0.0</Hack>
       <Pierce>20.0</Pierce>
       <Crush>0.0</Crush>
-      <MaxRange>90.0</MaxRange>
+      <MaxRange>72.0</MaxRange>
       <MinRange>10.0</MinRange>
       <ProjectileSpeed>75.0</ProjectileSpeed>
       <PrepareTime>1200</PrepareTime>
@@ -24,8 +24,8 @@
     </Ranged>
   </Attack>
   <BuildingAI>
-    <DefaultArrowCount>5</DefaultArrowCount>
-    <GarrisonArrowMultiplier>1.5</GarrisonArrowMultiplier>
+    <DefaultArrowCount>3</DefaultArrowCount>
+    <GarrisonArrowMultiplier>1</GarrisonArrowMultiplier>
   </BuildingAI>
   <BuildRestrictions>
     <Territory>own neutral</Territory>
