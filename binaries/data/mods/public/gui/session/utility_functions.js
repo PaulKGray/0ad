@@ -246,17 +246,17 @@ function damageTypesToText(dmg)
 	var dmgArray = [];
 	if (dmg.hack)
 		dmgArray.push(sprintf(translate("%(damage)s %(damageType)s"), {
-			damage: dmg.hack,
+			damage: Math.round(dmg.hack * 2) / 2,
 			damageType: "[font=\"sans-10\"][color=\"orange\"]" + translate("Hack") + "[/color][/font]"
 		}));
 	if (dmg.pierce)
 		dmgArray.push(sprintf(translate("%(damage)s %(damageType)s"), {
-			damage: dmg.pierce,
+			damage: Math.round(dmg.pierce * 2) / 2,
 			damageType: "[font=\"sans-10\"][color=\"orange\"]" + translate("Pierce") + "[/color][/font]"
 		}));
 	if (dmg.crush)
 		dmgArray.push(sprintf(translate("%(damage)s %(damageType)s"), {
-			damage: dmg.crush,
+			damage: Math.round(dmg.crush * 2) / 2,
 			damageType: "[font=\"sans-10\"][color=\"orange\"]" + translate("Crush") + "[/color][/font]"
 		}));
 
