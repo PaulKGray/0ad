@@ -24,7 +24,7 @@
     <Category>DefenseTower</Category>
     <Distance>
       <FromClass>DefenseTower</FromClass>
-      <MinDistance>50</MinDistance>
+      <MinDistance>60</MinDistance>
     </Distance>
   </BuildRestrictions>
   <Cost>
