@@ -5,7 +5,7 @@
       <Hack>0.0</Hack>
       <Pierce>20.0</Pierce>
       <Crush>0.0</Crush>
-      <MaxRange>57.0</MaxRange>
+      <MaxRange>56.0</MaxRange>
       <MinRange>8.0</MinRange>
       <ElevationBonus>15</ElevationBonus>
       <ProjectileSpeed>75.0</ProjectileSpeed>
@@ -71,7 +71,10 @@
   <ProductionQueue>
     <BatchTimeModifier>0.7</BatchTimeModifier>
     <Technologies datatype="tokens">
-      pair_tower_01
+      attack_tower_watch
+      attack_tower_crenellations
+      attack_tower_range
+      attack_tower_defense
     </Technologies>
   </ProductionQueue>
   <Sound>
