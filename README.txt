@@ -65,16 +65,20 @@ Units
 - Swordsmen cost less metal, but cost a little wood.
 - Cavalry Spearmen act more like knights and lancers - high attack, but slow repeat time.
 - Units move faster.
+- Unit gathering capacities reduced.
 
 Structures
 - All structures are now weaker against crush and hack damage.
-- Civic Centers have a better garrison multiplier in an attempt to combat 2v1 rushes.
 - Walls and Wall Towers take significantly longer to build.
 - Significantly nerfed the Roman Entrenched Army Camp.
 - Farms have increased HP and more armor against hack and pierce attacks.
+- Carthaginian docks now control a bit of territory and can garrison units.
+- Reduced default wall tower arrows to 0.
 
 Technologies
-- Some technologies have been made expensive (wip)
+- Most technologies cost a bit of metal.
+- Successive technologies become more expensive as you phase.
+- Some technologies have been made expensive.
 - Some pair technologies have been unpaired.
-- Added a powerful tech to the wonder.
+- Added a powerful [master] tech to the wonder.
 - Phasing now increases health to all citizen soldiers.
