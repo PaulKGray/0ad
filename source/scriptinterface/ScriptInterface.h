@@ -78,6 +78,8 @@ class CDebuggingServer;
  */
 class ScriptInterface
 {
+	NONCOPYABLE(ScriptInterface);
+	
 public:
 
 	/**
@@ -258,7 +260,7 @@ public:
 
 	bool SetPrototype(JS::HandleValue obj, JS::HandleValue proto);
 
-	bool FreezeObject(jsval obj, bool deep);
+	bool FreezeObject(JS::HandleValue objVal, bool deep);
 
 	bool Eval(const char* code);
 

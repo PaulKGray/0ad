@@ -287,7 +287,6 @@ public:
 	std::vector<bool> m_LosRevealAll;
 	bool m_LosCircular;
 	i32 m_TerrainVerticesPerSide;
-	size_t m_TerritoriesDirtyID;
 	
 	// Cache for visibility tracking (not serialized)
 	i32 m_LosTilesPerSide;
@@ -343,8 +342,6 @@ public:
 
 		m_LosCircular = false;
 		m_TerrainVerticesPerSide = 0;
-
-		m_TerritoriesDirtyID = 0;
 	}
 
 	virtual void Deinit()
@@ -981,10 +978,10 @@ public:
 			CFixedVector3D pos3d = cmpSourcePosition->GetPosition()+
 			    CFixedVector3D(entity_pos_t::Zero(), q.elevationBonus, entity_pos_t::Zero()) ;
 			// Get a quick list of entities that are potentially in range, with a cutoff of 2*maxRange
-			SpatialQueryArray ents;
+			std::vector<entity_id_t> ents;
 			m_Subdivision.GetNear(ents, pos, q.maxRange*2);
 
-			for (int i = 0; i < ents.size(); ++i)
+			for (size_t i = 0; i < ents.size(); ++i)
 			{
 				EntityMap<EntityData>::const_iterator it = m_EntityData.find(ents[i]);
 				ENSURE(it != m_EntityData.end());
@@ -1018,10 +1015,10 @@ public:
 		else
 		{
 			// Get a quick list of entities that are potentially in range
-			SpatialQueryArray ents;
+			std::vector<entity_id_t> ents;
 			m_Subdivision.GetNear(ents, pos, q.maxRange);
 
-			for (int i = 0; i < ents.size(); ++i)
+			for (size_t i = 0; i < ents.size(); ++i)
 			{
 				EntityMap<EntityData>::const_iterator it = m_EntityData.find(ents[i]);
 				ENSURE(it != m_EntityData.end());
@@ -1515,10 +1512,15 @@ public:
 
 	void UpdateVisibility(entity_id_t ent)
 	{
+		// Warning: Code related to fogging (like posting VisibilityChanged messages) 
+		// shouldn't be invoked while keeping an iterator to an element of m_EntityData.
+		// Otherwise, by deleting mirage entities and so on, 
+		// that code will change the indexes in the map, leading to segfaults. 
 		EntityMap<EntityData>::iterator itEnts = m_EntityData.find(ent);
 		if (itEnts == m_EntityData.end())
 			return;
 
+		// So we just remember what visibilities to update and do that later.
 		std::vector<u8> oldVisibilities;
 		std::vector<u8> newVisibilities;
 		
@@ -1603,13 +1605,13 @@ public:
 				m_LosState[i + j*m_TerrainVerticesPerSide] |= (LOS_EXPLORED << (2*(p-1)));
 			}
 		}
+
+		SeeExploredEntities(p);
 	}
 
-	void UpdateTerritoriesLos()
+	virtual void ExploreTerritories()
 	{
 		CmpPtr<ICmpTerritoryManager> cmpTerritoryManager(GetSystemEntity());
-		if (!cmpTerritoryManager || !cmpTerritoryManager->NeedUpdate(&m_TerritoriesDirtyID))
-			return;
 
 		const Grid<u8>& grid = cmpTerritoryManager->GetTerritoryGrid();
 		ENSURE(grid.m_W == m_TerrainVerticesPerSide-1 && grid.m_H == m_TerrainVerticesPerSide-1);
@@ -1635,6 +1637,50 @@ public:
 					m_LosState[i+1 + (j+1)*m_TerrainVerticesPerSide] |= (LOS_EXPLORED << (2*(p-1)));
 				}
 			}
+		}
+
+		for (player_id_t p = 1; p < MAX_LOS_PLAYER_ID+1; ++p)
+			SeeExploredEntities(p);
+	}
+
+	/**
+	 * Force any entity in explored territory to appear for player p.
+	 * This is useful for miraging entities inside the territory borders at the beginning of a game,
+	 * or if the "Explore Map" option has been set.
+	 */
+	void SeeExploredEntities(player_id_t p)
+	{
+		// Warning: Code related to fogging (like ForceMiraging) shouldn't be
+		// invoked while iterating through m_EntityData.
+		// Otherwise, by deleting mirage entities and so on, that code will 
+		// change the indexes in the map, leading to segfaults. 
+		// So we just remember what entities to mirage and do that later.
+		std::vector<entity_id_t> miragableEntities;
+		
+		for (EntityMap<EntityData>::iterator it = m_EntityData.begin(); it != m_EntityData.end(); ++it)
+		{
+			CmpPtr<ICmpPosition> cmpPosition(GetSimContext(), it->first);
+			if (!cmpPosition || !cmpPosition->IsInWorld())
+				continue;
+
+			CFixedVector2D pos = cmpPosition->GetPosition2D();
+			int i = (pos.X / (int)TERRAIN_TILE_SIZE).ToInt_RoundToNearest();
+			int j = (pos.Y / (int)TERRAIN_TILE_SIZE).ToInt_RoundToNearest();
+
+			CLosQuerier los(GetSharedLosMask(p), m_LosState, m_TerrainVerticesPerSide);
+			if (!los.IsExplored(i,j) || los.IsVisible(i,j))
+				continue;
+
+			CmpPtr<ICmpFogging> cmpFogging(GetSimContext(), it->first);
+			if (cmpFogging)
+				miragableEntities.push_back(it->first);
+		}
+
+		for (std::vector<entity_id_t>::iterator it = miragableEntities.begin(); it != miragableEntities.end(); ++it)
+		{
+			CmpPtr<ICmpFogging> cmpFogging(GetSimContext(), *it);
+			ENSURE(cmpFogging && "Impossible to retrieve Fogging component, previously achieved");
+			cmpFogging->ForceMiraging(p);
 		}
 	}
 
